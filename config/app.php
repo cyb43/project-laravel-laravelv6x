@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * ^2_3^
+ * 2020-04-23
+ */
 return [
 
     /*
@@ -13,7 +17,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'project-laravel-laravelv6x'),
 
     /*
     |--------------------------------------------------------------------------
@@ -46,7 +50,7 @@ return [
     | Application URL
     |--------------------------------------------------------------------------
     |
-    | This URL is used by the console to properly generate URLs when using
+    | This URL is used by the console to properly(恰当地) generate URLs when using
     | the Artisan command line tool. You should set this to the root of
     | your application so that it is used when running Artisan tasks.
     |
@@ -63,7 +67,7 @@ return [
     |
     | Here you may specify the default timezone for your application, which
     | will be used by the PHP date and date-time functions. We have gone
-    | ahead and set this to a sensible default for you out of the box.
+    | ahead and set this to a sensible(合乎情理的) default for you out of the box.
     |
     */
 
@@ -88,7 +92,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | The fallback locale determines the locale to use when the current one
-    | is not available. You may change the value to correspond to any of
+    | is not available. You may change the value to correspond(符合) to any of
     | the language folders that are provided through your application.
     |
     */
@@ -125,7 +129,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Autoloaded Service Providers
+    | Autoloaded Service Providers (服务提供器)
     |--------------------------------------------------------------------------
     |
     | The service providers listed here will be automatically loaded on the
@@ -179,12 +183,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Class Aliases
+    | Class Aliases (类别名)
     |--------------------------------------------------------------------------
     |
     | This array of class aliases will be registered when this application
     | is started. However, feel free to register as many as you wish as
-    | the aliases are "lazy" loaded so they don't hinder performance.
+    | the aliases are "lazy" loaded so they don't hinder(阻碍) performance.
     |
     */
 

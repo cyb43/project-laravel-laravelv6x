@@ -2,6 +2,7 @@
 
 /**
  * Laravel - A PHP Framework For Web Artisans
+ * ^2_3^ program entry (程序入口)
  *
  * @package  Laravel
  * @author   Taylor Otwell <taylor@laravel.com>
