@@ -129,7 +129,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Autoloaded Service Providers (服务提供器)
+    | Autoloaded Service Providers (服务提供器注册)
     |--------------------------------------------------------------------------
     |
     | The service providers listed here will be automatically loaded on the

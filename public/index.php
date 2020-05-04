@@ -20,6 +20,7 @@ define('LARAVEL_START', microtime(true));
 | into the script here so that we don't have to worry about manual
 | loading any of our classes later on. It feels great to relax.
 |
+| 加载 Composer 生成的自动加载设置。
 */
 
 require __DIR__.'/../vendor/autoload.php';
@@ -34,6 +35,7 @@ require __DIR__.'/../vendor/autoload.php';
 | will load up this application so that we can run it and send
 | the responses back to the browser and delight our users.
 |
+| 从 bootstrap/app.php 脚本中检索 Laravel 应用程序的实例。
 */
 
 $app = require_once __DIR__.'/../bootstrap/app.php';

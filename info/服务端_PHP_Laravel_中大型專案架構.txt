@@ -1,0 +1,2108 @@
+服务端_PHP_Laravel_中大型專案架構
+--
+--
+文摘 https://oomusou.io/laravel/architecture/ Version(Laravel 5.1.24)
+(外篇参考 https://learnku.com/articles/39000 )
+(外篇参考 https://www.kancloud.cn/curder/laravel/408484 )
+--
+--
+初學者學習 Laravel 時分兩種，一種是乖乖的將程式填入 MVC 架構內，導致 controller 與 model 異常的肥大，日後一樣很難維護；一種是常常不知道程式該寫在哪一個 class 內而猶豫不決，畢竟傳統 PHP 都是一個頁面一個檔案。本文整理出最適合 Laravel 的中大型專案架構，兼具容易維護、容易擴充與容易重複使用的特點，並且容易測試。
+--
+--
+--
+--
+零、中大型專案架構
+--
+--
+1、Controller 過於肥大
+--
+简述：受RoR(Ruby on Rails，Ruby on Rails是一个用于编写网络应用程序的框架，它基于计算机软件语言Ruby，给程序开发人员提供强大的框架支持。Ruby on Rails包括两部分内容：Ruby语言和Rails框架)的影響，初學者常認為 MVC 架構就是 model, view, controller。Model 就是資料庫，模型。Controller 負責與 HTTP 溝通，調用 model 與 view，控制器。View 就是 HTML，是视图。
+--
+假如依照這個定義，以下這些需求該寫在哪裡呢？
+|1>發送 Email，使用外部 API。
+|2>使用 PHP 寫的邏輯。
+|3>依需求將顯示格式作轉換。
+|4>依需求是否顯示某些資料。
+|5>依需求顯示不同資料。
+其中 1, 2 屬於商業邏輯，而 3, 4, 5 屬於顯示邏輯，若依照一般人對 MVC 的定義，model 是資料庫，而 view 又是 HTML，以上這些需求都不能寫在 model 與 view，只能勉強寫在 controller。因此初學者開始將大量程式寫在 controller，造成 controller 的肥大難以維護。
+--
+--
+2、Model 過於肥大
+--
+简述：既然邏輯寫在 controller 不方便維護，那我將邏輯都寫在 model 就好了？當你將邏輯從 controller 搬到 model 後，雖然 controller 變瘦了，但卻肥了 model，model 從原本代表資料庫，現在變成還要負擔商業邏輯與顯示邏輯，結果更慘。
+--
+Model 代表資料庫嗎？把它想成是 Eloquent class就好，資料庫邏輯應該寫在 repository 裡，這也是為什麼 Laravel 5 已經沒有 models目錄，Eloquent class 僅僅是放在 app 根目錄下而已。
+--
+--
+3、中大型專案架構
+--
+那我們該怎麼寫呢？別將我們的思維侷限在 MVC 內。
+|1>Model : 僅當成 Eloquent class，模型。
+|2>Repository : 輔助 model，處理資料庫邏輯，然後注入到 service，仓储。
+|3>Service : 輔助 controller，處理商業邏輯，然後注入到 controller，服务。
+|4>Controller : 接收 HTTP request，調用其他 service，控制器。
+|5>Presenter : 處理顯示邏輯，然後注入到 view，推荐者。
+|6>View : 使用 blade 將資料 binding 到 HTML，视图。
+Model -> Repository --> Service -> Controller | Presenter -> View
+其中藍色(Model、Controller、View)為原本的 MVC，而紫色為本文要介紹的的重點 : Repository 模式，Service 模式與 Presenter 模式。箭頭表示物件依賴注入的方向。
+--
+我們可以發現 MVC 架構還在，由於 SOLID 的單一職責原則與依賴反轉原則。
+|1>我們將資料庫邏輯從 model 分離出來，由 repository 輔助 model，將 model 依賴注入進 repository。
+|2>我們將商業邏輯從 controller 分離出來，由 service 輔助 controller，將 service 依賴注入進 controller。
+|3>我們將顯示邏輯從 view 分離出來，由 presenter 輔助 view，將 presenter 依賴注入進 view。
+--
+(1)、建立目錄
+--
+在 app 目錄下建立 Repositories，Services 與 Presenters 目錄，別害怕建立目錄。
+--
+別害怕在 Laravel 預設目錄以外建立的其他目錄，根據 SOLID 的單一職責原則，class 功能越多，責任也越多，因此越違反單一職責原則，所以你應該將你的程式分割成更小的部分，每個部分都有它專屬的功能，而不是一個 class 功能包山包海，也就是所謂的萬能類別，所以整個專案不應該只有 MVC 三個部分，放手根據你的需求建立適當的目錄，並將適當的 class 放到該目錄下，只要我們的 class 有 namespace 幫我們分類即可。
+--
+(2)、Repository 仓储
+如何使用 Repository 模式? https://oomusou.io/laravel/repository/
+--
+(3)、Service 服务
+如何使用 Service 模式? https://oomusou.io/laravel/service/
+--
+(4)、Presenter 推荐者
+如何使用 Presenter 模式? https://oomusou.io/laravel/presenter/
+--
+--
+4、單元測試
+由於現在 model、view、controller 的相依物件都已經拆開，也都使用依賴注入，因此每個部分都可以單獨的做單元測試，如要測試 service，就將 repository 加以 mock，也可以將其他 service 加以 mock。Presenter 也可以單獨跑單元測試，將其他 service 加以 mock，不一定要跑驗收測試才能測顯示邏輯。
+--
+--
+5、Conclusion 结论
+本文談到的架構只是開始，你可以依照實際需求增加更多的目錄與 class，當你發現你的 MVC 違反 SOLID 原則時，就大膽的將 class 從 MVC 拆開重構，然後依照以下手法 。
+|1>建立新的 class 或 interface。
+|2>將相依物件依賴注入到 class。
+|3>在 class 內處理他的職責。
+|4>將 class 或 interface 注入到 controller 或 view。
+最後搭配單元測試，測試重構後的架構是否與原來的需求結果相同。
+--
+--
+--
+--
+一、如何使用 Repository 模式?
+参考 https://oomusou.io/laravel/repository/ Version(Laravel 5.1.22)
+--
+简述：使用 Repository 輔助 Model。若將資料庫邏輯都寫在 model，會造成 model 的肥大而難以維護，基於SOLID原則，我們應該使用 Repository 模式輔助 model，將相關的資料庫邏輯封裝在不同的 repository，方便中大型專案的維護。
+--
+--
+1、資料庫邏輯
+--
+在 CRUD 中，CUD 比較穩定，但 R 的部分則千變萬化，大部分的資料庫邏輯都在描述 R 的部分，若將資料庫邏輯寫在 controller 或 model 都不適當，會造成 controller 與 model 肥大，造成日後難以維護。
+--
+--
+2、Model 資料庫(模型)
+--
+使用 repository 之後，model 僅當成Eloquent class 即可，不要包含資料庫邏輯，僅保留以下部分。
+|1> Property : 如$table，$fillable…等。
+|2> Mutator: 包括 mutator 與 accessor。
+|3> Method : relation 類的 method，如使用 hasMany() 與 belongsTo()。
+//
+单一对应关系。
+|1> hasOne
+|2> belongsTo
+|3> morphTo
+|4> morphOne
+//
+多个对应关系指的是使用以下关键词定义的关联模型。
+|1> hasMany
+|2> belongsToMany
+|3> morphMany
+|4> morphToMany
+|5> morphedByMany
+//
+註解 : 因為 Eloquent 會根據資料庫欄位動態產生 property 與 method等。若使用 Laravel IDE Helper( https://github.com/barryvdh/laravel-ide-helper )，會直接在 model 加上 @property 與 @method 描述 model 的動態 property 與 method。如下 app\User.php 中安装完 Laravel IDE Helper 后执行 php artisan ide-helper:models 后自动生成的内容。
+--
+//// App\User.php
+<?php
+
+namespace App;
+
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+
+/**
+ * App\User
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string $remember_token
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereEmail($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereId($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereName($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User wherePassword($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereRememberToken($value)
+ * @method static \Illuminate\Database\Query\Builder|\App\User whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
+class User extends Authenticatable
+{
+    use Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'name', 'email', 'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for arrays.
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'password', 'remember_token',
+    ];
+}
+?>
+//
+//// app/User.php
+////
+namespace MyBlog;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+/**
+ * MyBlog\User
+ *
+ * @property integer $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string $remember_token
+ * @property \Carbon\Carbon $created_at
+ * @property \Carbon\Carbon $updated_at
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereId($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereName($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereEmail($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User wherePassword($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereRememberToken($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereCreatedAt($value)
+ * @method static \Illuminate\Database\Query\Builder|\MyBlog\User whereUpdatedAt($value)
+ */
+class User extends Model implements AuthenticatableContract,
+                                    AuthorizableContract,
+                                    CanResetPasswordContract
+{
+    use Authenticatable, Authorizable, CanResetPassword;
+
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name', 'email', 'password'];
+
+    /**
+     * The attributes excluded from the model's JSON form.
+     *
+     * @var array
+     */
+    protected $hidden = ['password', 'remember_token'];
+}
+IDE-Helper 幫我們替 model 加上註解(类名前边注释)，讓我們可以在 PhpStorm 的語法提示使用 model 的 property 與 method。
+--
+--
+3、Repository 仓储
+//// 初學者常會在 controller 直接調用 model 寫資料庫邏輯；
+//   資料庫邏輯是要抓 20 歲以上的資料；
+public function index()
+{
+    $users = User::where('age', '>', 20)
+                ->orderBy('age')
+                ->get();
+
+    return view('users.index', compact('users'));
+}
+--
+在中大型專案，會有幾個問題。
+|1>將資料庫邏輯寫在 controller，造成 controller 的肥大難以維護。
+|2>違反 SOLID 的單一職責原則 : 資料庫邏輯不應該寫在 controller。
+|3>controller 直接相依於model，使得我們無法對 controller 做單元測試。
+--
+比較好的方式是使用 repository。
+|1>將 model 依賴注入到 repository。
+|2>將資料庫邏輯寫在 repository。
+|3>將 repository 依賴注入到 service。
+--
+//// app/Repositories/UserRepository.php
+//// 
+namespace MyBlog\Repositories;
+use Doctrine\Common\Collections\Collection;
+use MyBlog\User;
+/**
+ * UserRepository 仓储
+ */
+class UserRepository
+{
+    /** @var User 注入的User model */
+    protected $user;
+
+    /**
+     * UserRepository constructor.
+     * @param User $user
+     */
+    public function __construct(User $user)
+    {
+        // 將相依的 User model 依賴注入到 UserRepository
+        $this->user = $user;
+    }
+
+    /**
+     * 回傳大於?年紀的資料
+     * @param integer $age
+     * @return Collection
+     */
+    public function getAgeLargerThan($age)
+    {
+	// 將抓 20 歲以上的資料的資料庫邏輯寫在 getAgeLargerThan()，不是使用User facade，而是使用注入的$this->user。
+	// 這裡也可以使用User facade 的方式，並不會影響可測試性，因為實務上在測試 repository 時，會真的去讀寫資料庫，而不會去 mock User model，因此可以依可測試性決定要用依賴注入還是 Facade。
+        return $this->user
+            ->where('age', '>', $age)
+            ->orderBy('age')
+            ->get();
+    }
+}
+////
+//// app/Http/Controllers/UserController.php
+//// Repository 仓储 注入 Controller
+namespace App\Http\Controllers;
+use App\Http\Requests;
+use MyBlog\Repositories\UserRepository;
+class UserController extends Controller
+{
+    /** @var  UserRepository 注入的UserRepository */
+    protected $userRepository;
+
+    /**
+     * UserController constructor.
+     *
+     * @param UserRepository $userRepository
+     */
+    public function __construct(UserRepository $userRepository)
+    {
+        // 將相依的 UserRepository 依賴注入到 UserController
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // 從原本直接相依的 User model，改成依賴注入的 UserRepository
+        $users = $this->userRepository
+            ->getAgeLargerThan(20);
+
+        return view('users.index', compact('users'));
+    }
+}
+////
+改用這種寫法，有幾個優點。
+|1>將資料庫邏輯寫在 repository，解決 controller 肥大問題。
+|2>符合 SOLID 的單一職責原則 : 資料庫邏輯寫在 repository，沒寫在 controller。
+|3>符合 SOLID 的依賴反轉原則 : controller 並非直接相依於 repository，而是將 repository 依賴注入進 controller。
+實務上建議 repository 僅依賴注入於 service，而不要直接注入在 controller，本範例因為還沒介紹到 servie 模式，為了簡化起見，所以直接注入於 controller。
+--
+--
+4、是否該建立 Repository Interface?
+--
+理論上使用依賴注入時，應該使用 interface，不過 interface 目的在於抽象化方便抽換，讓程式碼達到開放封閉的要求，但是實務上要抽換 repository 的機會不高，除非你有抽換資料庫的需求，如從 MySQL 抽換到 MongoDB，此時就該建立 repository interface。
+--
+不過由於我們使用了依賴注入，將來要從 class 改成 interface 也很方便，只要在 constructor 的 type hint 改成 interface 即可，維護成本很低，所以在此大可使用 repository class 即可，不一定得用 interface 而造成 over design，等真正需求來時再重構成 interface 即可。
+--
+--
+5、是否該使用 Query Scope？
+简述：Laravel 4.2 就有 query scope，到 5.1 都還留著，它讓我們可以將商業邏輯寫在 model，解決了維護與重複使用的問題。
+////
+//// app/User.php
+////
+namespace MyBlog;
+use Illuminate\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use Illuminate\Foundation\Auth\Access\Authorizable;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+/**
+ * (註解:略)
+ */
+class User extends Model implements AuthenticatableContract,
+                                    AuthorizableContract,
+                                    CanResetPasswordContract
+{
+    use Authenticatable, Authorizable, CanResetPassword;
+
+    /**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = 'users';
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $fillable = ['name', 'email', 'password'];
+
+    /**
+     * The attributes excluded from the model's JSON form.
+     *
+     * @var array
+     */
+    protected $hidden = ['password', 'remember_token'];
+
+    /**
+     * 回傳大於?年紀的資料
+     * @param Builder $query
+     * @param integer $age
+     * @return Builder
+     */
+    public function scopeGetAgerLargerThan($query, $age)
+    {
+        return $query->where('age', '>', $age)
+            ->orderBy('age');
+    }
+}
+Query scope 必須以 scope 為 prefix，第 1 個參數為 query builder，一定要加，是 Laravel 要用的。第2個參數以後為自己要傳入的參數。由於回傳也必須是一個 query builder，因此不加上 get()。
+////
+//// app/Http/Controllers/UserController.php
+////
+namespace App\Http\Controllers;
+use App\Http\Requests;
+use MyBlog\User;
+class UserController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        // 在 controller 呼叫 query scope 時，不要加上 prefix，由於其本質是 query builder，所以還要加上 get() 才能抓到Collection。
+        $users = User::getAgerLargerThan(20)->get();
+
+        return view('users.index', compact('users'));
+    }
+}
+--
+由於 query scope 是寫在 model，不是寫在 controller，所以基本上解決了 controller 肥大與違反 SOLID 的單一職責原則的問題，controller 也可以重複使用 query scope，已經比直接將資料庫邏輯寫在 controller 好很多了。
+--
+不過若在中大型專案，仍有以下問題。
+|1>Model 已經有原來的責任，若再加上 query scope，造成 model 過於肥大難以維護。
+|2>若資料庫邏輯很多，可以拆成多 repository，可是卻很難拆成多 model。
+|3>單元測試困難，必須面臨 mock Eloquent 的問題。
+--
+--
+6、Conclusion 结论
+--
+實務上可以一開始 1 個 repository 對應 1 個 model，但不用太執著於 1 個 repository 一定要對應 1 個 model，可將 repository 視為邏輯上的資料庫邏輯類別即可，可以橫跨多個 model 處理，也可以 1 個 model 拆成多個 repository，端看需求而定。Repository 使得資料庫邏輯從 controller 或 model中解放，不僅更容易維護、更容易擴展、更容易重複使用，且更容易測試。
+--
+7、Sample Code 简单实例
+--
+完整的範例可以在我的 GitHub( https://github.com/oomusou/Laravel51Repository_demo ) 上找到。
+--
+--
+--
+--
+二、如何使用 Service 模式?
+参考 https://oomusou.io/laravel/service/ Version(Laravel 5.1.22)
+--
+使用 Service 輔助 Controller。若將商業邏輯都寫在 controller，會造成 controller 肥大而難以維護，基於SOLID原則，我們應該使用 Service 模式輔助 controller，將相關的商業邏輯封裝在不同的 service，方便中大型專案的維護。
+--
+--
+1、商業邏輯
+--
+商業邏輯中，常見的如。
+|1>牽涉到外部行為 : 如發送Email，使用外部API。
+|2>使用PHP寫的邏輯 : 如根據購買的件數，有不同的折扣。
+若將商業邏輯寫在 controller，會造成 controller 肥大，日後難以維護。
+--
+--
+2、Service 服务
+--
+(1)、牽涉到外部行為
+--
+如發送Email，初學者常會在 controller 直接調用 Mail::queue()。
+public function store(Request $request)
+{
+    Mail::queue('email.index', $request->all(), function (Message $message) {
+        $message->sender(env('MAIL_USERNAME'));
+        $message->subject(env('MAIL_SUBJECT'));
+        $message->to(env('MAIL_TO_ADDR'));
+    });
+}
+--
+在中大型專案，會有幾個問題。
+|1>將牽涉到外部行為的商業邏輯寫在 controller，造成 controller 的肥大難以維護(Mail::queue()只有一行可能無感，但很多外部服務需要一連串 API，甚至還要有 try/catch 處理。)。
+|2>違反 SOLID 的單一職責原則 : 外部行為不應該寫在 controller。
+|3>controller 直接相依於外部行為，使得我們無法對 controller 做單元測試。
+--
+比較好的方式是使用 service。
+|1>將外部行為注入到 service。
+|2>在 service 使用外部行為。
+|3>將 service 注入到 controller。
+--
+////
+//// app/Services/EmailService.php
+//// https://github.com/oomusou/Laravel51ServiceExternal_demo/commit/d07b0200f447de85915dac444911ad22e2b3dbd7
+//// 
+namespace App\Services;
+use Illuminate\Mail\Mailer;
+use Illuminate\Mail\Message;
+class EmailService
+{
+    /** @var Mailer */
+    private $mail;
+
+    /**
+     * EmailService constructor.
+     * @param Mailer $mail
+     */
+    public function __construct(Mailer $mail)
+    {
+        // 將相依的Mailer注入到EmailService
+        $this->mail = $mail;
+    }
+
+    /**
+     * 發送Email
+     * @param array $request
+     */
+    public function send(array $request)
+    {
+	// 將發送 Emai的商業邏輯寫在send()，不是使用Mail facade，而是使用注入的$this->mail。
+        $this->mail->queue('email.index', $request, function (Message $message) {
+            $message->sender(env('MAIL_USERNAME'));
+            $message->subject(env('MAIL_SUBJECT'));
+            $message->to(env('MAIL_TO_ADDR'));
+        });
+    }
+}
+--
+////
+//// app/Http/Controllers/UserController.php
+//// https://github.com/oomusou/Laravel51ServiceExternal_demo/commit/6addfe7ee2d3247c5cf11a8d93b8b053785121cc
+////
+namespace App\Http\Controllers;
+use App\Http\Requests;
+use Illuminate\Http\Request;
+use MyBlog\Services\EmailService;
+class UserController extends Controller
+{
+    /** @var EmailService */
+    protected $emailService;
+
+    /**
+     * UserController constructor.
+     * @param EmailService $emailService
+     */
+    public function __construct(EmailService $emailService)
+    {
+        // 將相依的 EmailService 注入到 UserController
+        $this->emailService = $emailService;
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        // 從原本直接相依於 Mail facade，改成相依於注入的 EmailService
+        $this->emailService->send($request->all());
+    }
+}
+--
+改用這種寫法，有幾個優點。
+|1>將外部行為寫在 service，解決 controller 肥大問題。
+|2>符合 SOLID 的單一職責原則 : 外部行為寫在 service，沒寫在 controller。
+|3>符合 SOLID 的依賴反轉原則 : controller 並非直接相依於 service，而是將 service 依賴注入進 controller。
+--
+(2)、使用 PHP 寫的邏輯
+--
+//// 如根據購買的件數，有不同的折扣，初學者常會在 controller 直接寫 if...else 邏輯。
+public function store(Request $request)
+{
+    $qty = $request->input('qty');
+
+    $price = 500;
+
+    if ($qty == 1) {
+        $discount = 1.0;
+    }
+    elseif ($qty == 2) {
+        $discount = 0.9;
+    }
+    elseif ($qty == 3) {
+        $discount = 0.8;
+    }
+    else {
+        $discount = 0.7;
+    }
+
+    $total = $price * $qty * $discount;
+
+    echo($total);
+}
+--
+在中大型專案，會有幾個問題。
+|1>將 PHP 寫的商業邏輯直接寫在 controller，造成 controller 的肥大難以維護。
+|2>違反 SOLID的 單一職責原則 : 商業邏輯不應該寫在 controller。
+|3>違反 SOLID的 單一職責原則 : 若未來想要改變折扣與加總的算法，都需要改到此 method，也就是說，此 method 同時包含了計算折扣與計算加總的職責，因此違反 SOLID 的單一職責原則。
+|4>直接寫在 controller 的邏輯無法被其他 controller 使用。
+--
+比較好的方式是使用 service。
+|1>將相依物件注入到 service。
+|2>在 service 寫 PHP邏輯使用相依物件。
+|3>將 service 注入到 controller。
+--
+//// app/Services/OrderService.php
+////
+namespace App\Services;
+class OrderService
+{
+    /**
+     * 計算折扣
+     * @param int $qty
+     * @return float
+     */
+    public function getDiscount($qty)
+    {
+        // 為了符合 SOLID 的單一職責原則，將計算折扣獨立成 getDiscount()，將PHP寫的判斷邏輯寫在裡面
+        if ($qty == 1) {
+            return 1.0;
+        } elseif ($qty == 2) {
+            return 0.9;
+        } elseif ($qty == 3) {
+            return 0.8;
+        } else {
+            return 0.7;
+        }
+    }
+
+    /**
+     * 計算最後價錢
+     * @param integer $qty
+     * @param float $discount
+     * @return float
+     */
+    public function getTotal($qty, $discount)
+    {
+        // 為了符合 SOLID 的單一職責原則，將計算加總獨立成 getTotal()，將PHP寫的計算邏輯寫在裡面
+        return 500 * $qty * $discount;
+    }
+}
+--
+//// app/Http/Controllers/OrderController.php
+////
+namespace App\Http\Controllers;
+use App\Http\Requests;
+use App\MyBlog\Services\OrderService;
+use Illuminate\Http\Request;
+class OrderController extends Controller
+{
+    /** @var OrderService */
+    protected $orderService;
+
+    /**
+     * OrderController constructor.
+     * @param OrderService $orderService
+     */
+    public function __construct(OrderService $orderService)
+    {
+        // 將相依的 OrderService 注入到 UserController
+        $this->orderService = $orderService;
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        $qty = $request->input('qty');
+
+        $discount = $this->orderService->getDiscount($qty);
+        $total = $this->orderService->getTotal($qty, $discount);
+
+        echo($total);
+    }
+}
+將原本的 if...else 邏輯改成呼叫 OrderService，controller 變得非常乾淨，也達成原本 controller 接收 HTTP request，調用其他 class 的責任。
+--
+改用這種寫法，有幾個優點。
+|1>將PHP寫的商業邏輯寫在 service，解決 controller 肥大問題。
+|2>符合 SOLID 的單一職責原則 : 商業邏輯寫在 service，沒寫在 controller。
+|3>符合 SOLID 的單一職責原則 : 計算折扣與計算加總分開在不同 method，且歸屬於 OrderService，而非 OrderController。
+|4>符合 SOLID 的依賴反轉原則 : controller 並非直接相依於 service，而是將 service依賴注入進 controller。
+|5>其他 controller 也可以重複使用此段商業邏輯。
+--
+--
+3、Controller 控制器
+//// 牽涉到外部行為
+//// 
+public function store(Request $request)
+{
+    $this->emailService->send($request->all());
+}
+--
+//// 使用 PHP 寫的邏輯
+////
+public function store(Request $request)
+{
+    $qty = $request->input('qty');
+
+    $discount = $this->orderService->getDiscount($qty);
+    $total = $this->orderService->getTotal($qty, $discount);
+
+    echo($total);
+}
+若使用了 service 輔助 controller，再搭配依賴注入與 service container，則 controller 就非常乾淨，能專心處理接收HTTP request，調用其他class的職責了。
+--
+--
+4、Conclusion 总结
+--
+實務上會有很多 service，須自行依照 SOLID 原則去判斷是否該建立 service。
+Service 使得商業邏輯從 controller 中解放，不僅更容易維護、更容易擴展、更容易重複使用，且更容易測試。
+--
+--
+5、Sample Code 简单实例
+--
+完整的範例可以在我的GitHub( https://github.com/oomusou/ )上找到。
+External API https://github.com/oomusou/Laravel51ServiceExternal_demo
+If…else https://github.com/oomusou/Laravel51ServiceIfElse_demo
+--
+--
+--
+--
+三、如何使用 Presenter 模式?
+参考 https://oomusou.io/laravel/presenter/ Version(Laravel 5.1.22)
+--
+使用 Presenter 輔助 View。若將顯示邏輯都寫在 view，會造成 view 肥大而難以維護，基於 SOLID 原則，我們應該使用 Presenter 模式輔助 view，將相關的顯示邏輯封裝在不同的 presenter，方便中大型專案的維護。
+--
+--
+1、顯示邏輯
+--
+顯示邏輯中，常見的如。
+|1>將資料顯示不同資料 : 如性別欄位為M，就顯示Mr.，若性別欄位為F，就顯示Mrs.。
+|2>是否顯示某些資料 : 如根據欄位值是否為Y，要不要顯示該欄位。
+|3>依需求顯示不同格式 : 如依照不同的語系，顯示不同的日期格式。
+--
+--
+2、Presenter 推荐者
+--
+(1)、將資料顯示不同資料
+--
+如性別欄位為M，就顯示Mr.，若性別欄位為F，就顯示Mrs.，初學者常會直接用 blade 寫在 view。
+--
+在中大型專案，會有幾個問題。
+|1>由於 blade 與 HTML 夾雜，不太適合寫太複雜的程式，只適合做一些簡單的 binding，否則很容易流於傳統 PHP 的義大利麵程式。
+|2>無法對顯示邏輯做重構與物件導向。
+--
+比較好的方式是使用 presenter。
+|1>將相依物件注入到 presenter。
+|2>在 presenter 內寫格式轉換。
+|3>將 presenter 注入到 view。
+--
+//// app/Presenters/UserPresenter.php
+////
+namespace App\Presenters;
+class UserPresenter
+{
+    /**
+     * 性別欄位為M，就顯示Mr.，若性別欄位為F，就顯示Mrs.
+     * @param string $gender
+     * @param string $name
+     * @return string
+     */
+    public function getFullName($gender, $name)
+    {
+        if ($gender == 'M')
+            $fullName = 'Mr. ' . $name;
+        else
+            $fullName = 'Mrs. ' . $name;
+
+        return $fullName;
+    }
+}
+--
+//// view
+//// 將原本在 blade 用 @if...@else...@endif 寫的邏輯，改寫在 presenter。
+////
+<div>
+	@inject('UserPresenter', 'MyBlog\Presenters\UserPresenter.php')
+	@foreach($users as $user)
+	<div>
+		<h2>{{ $UserPresenter->getFullName($user->gender, $user->name) }}</h2>
+		<h2>{{ $user->email }}</h2>
+	</div>
+	@endforeach
+</div>
+使用 @inject() 注入 UserPresenter，讓 view 也可以如 controller 一樣使用注入的物件。將來無論顯示邏輯怎麼修改，都不用改到 blade，直接在 presenter 內修改。
+--
+改用這種寫法，有幾個優點。
+|1>將資料顯示不同格式的顯示邏輯改寫在 presenter，解決寫在 blade 不容易維護的問題。
+|2>可對顯示邏輯做重構與物件導向。
+--
+(2)、是否顯示某些資料
+--
+/// 如根據欄位值是否為Y，要不要顯示該欄位，初學者常會直接用 blade 寫在 view。
+@if( $user->show_email == 'Y' )
+<h2>{{ $user->email }}</h2>
+@endif
+--
+在中大型專案，會有幾個問題。
+|1>由於 blade 與 HTML 夾雜，不太適合寫太複雜的程式，只適合做一些簡單的 binding，否則很容易流於傳統 PHP 的義大利麵程式。
+|2>無法對顯示邏輯做重構與物件導向。
+--
+比較好的方式是使用 presenter。
+|1>將相依物件注入到 presenter。
+|2>在 presenter 內寫格式轉換。
+|3>將 presenter 注入到 view。
+--
+//// app/Presenters/UserPresenter.php
+////
+namespace App\Presenters;
+use App\User;
+class UserPresenter
+{
+    /**
+     * 是否顯示email
+     * @param User $user
+     * @return string
+     */
+    public function showEmail(User $user)
+    {
+        // 將 @if() 的 boolean 判斷，封裝在 presenter 內，改由 presenter 負責送出 HTML
+        if ($user->show_email == 'Y')
+            return '<h2>' . $user->email . '</h2>';
+        else
+            return '';
+    }
+}
+////
+//// view
+<div>
+	@inject('UserPresenter', 'MyBlog\Presenters\UserPresenter.php')
+	@foreach($users as $user)
+	<div>
+		<h2>{!! $UserPresenter->showEmail($user) !!!}</h2>
+	</div>
+	@endforeach
+</div>
+使用 @inject() 注入 UserPresenter，讓 view 也可以如 controller 一樣使用注入的物件。{!! !!!} 會保有原來 HTML 格式。將來無論顯示邏輯怎麼修改，都不用改到 blade，直接在 presenter 內修改。
+--
+改用這種寫法，有幾個優點。
+|1>是否顯示某些資料的顯示邏輯改寫在 presenter，解決寫在 blade 不容易維護的問題。
+|2>可對顯示邏輯做重構與物件導向。
+--
+(3)、依需求顯示不同格式
+如依照不同的語系，顯示不同的日期格式，初學者常會直接用 blade 寫在 view中(blade、mutator 與 presenter 的比較，詳細請參考如何依各種語言顯示不同日期格式？ https://oomusou.io/laravel/dateformat/ )。
+@if($locale === 'uk')
+	<h2>{{ $user->created_at->format('d M, Y') }}</h2>
+@elseif($locale === 'tw')
+	<h2>{{ $user->created_at->format('Y/m/d') }}</h2>
+@else
+	<h2>{{ $user->created_at->format('M d, Y') }}</h2>
+@endif
+--
+在中大型專案，會有幾個問題。
+|1>由於 blade 與 HTML 夾雜，不太適合寫太複雜的程式，只適合做一些簡單的 binding，否則很容易流於傳統 PHP 的義大利麵程式。
+|2>無法對顯示邏輯做重構與物件導向。
+|3>違反SOLID的開放封閉原則 : 若將來要支援新的語系，只能不斷地在 blade 新增 if...else(開放封閉原則 : 軟體中的類別、函式對於擴展是開放的，對於修改是封閉的)。
+--
+比較好的方式是使用 presenter。
+|1>將相依物件注入到 presenter。
+|2>在 presenter 內寫不同的日期格式轉換邏輯。
+|3>將 presenter 注入到 view。
+--
+//// app/Presenters/DateFormatPresenterInterface.php
+////
+namespace App\Presenters;
+use Carbon\Carbon;
+interface DateFormatPresenterInterface
+{
+    /**
+     * 顯示日期格式
+     * 定義了 showDateFormat()，各語言必須在 showDateFormat() 使用 Carbon 的 format()去轉換日期格式。
+     * @param Carbon $date
+     * @return string
+     */
+    public function showDateFormat(Carbon $date) : string;
+}
+//// 
+//// app/Presenters/DateFormatPresenter_uk.php
+////
+namespace App\Presenters;
+use Carbon\Carbon;
+class DateFormatPresenter_uk implements DateFormatPresenterInterface
+{
+    /**
+     * 顯示日期格式
+     * @param Carbon $date
+     * @return string
+     */
+    public function showDateFormat(Carbon $date) : string
+    {
+        // DateFormatPresenter_uk 實現了 DateFormatPresenterInterface，並將轉換成英國日期格式的 Carbon 的 format() 寫在 showDateFormat() 內
+        return $date->format('d M, Y');
+    }
+}
+////
+//// app/Presenters/DateFormatPresenter_tw.php
+////
+namespace App\Presenters;
+use Carbon\Carbon;
+class DateFormatPresenter_tw implements DateFormatPresenterInterface
+{
+    /**
+     * 顯示日期格式
+     * @param Carbon $date
+     * @return string
+     */
+    public function showDateFormat(Carbon $date) : string
+    {
+        // DateFormatPresenter_tw 實現了 DateFormatPresenterInterface，並將轉換成台灣日期格式的 Carbon 的 format() 寫在 showDateFormat() 內
+        return $date->format('Y/m/d');
+    }
+}
+////
+//// app/Presenters/DateFormatPresenter_us.php
+////
+namespace App\Presenters;
+use Carbon\Carbon;
+class DateFormatPresenter_us implements DateFormatPresenterInterface
+{
+    /**
+     * 顯示日期格式
+     * @param Carbon $date
+     * @return string
+     */
+    public function showDateFormat(Carbon $date) : string
+    {
+        // DateFormatPresenter_us 實現了 DateFormatPresenterInterface，並將轉換成美國日期格式的 Carbon 的 format() 寫在 showDateFormat() 內
+        return $date->format('M d, Y');
+    }
+}
+--
+3、Presenter 工廠
+--
+由於每個語言的日期格式都是一個 presenter 物件，那勢必遇到一個最基本的問題 : 我們必須根據不同的語言去 new 不同的 presenter 物件，直覺我們可能會在 controller 去 new presenter。
+--
+public function index(Request $request)
+{
+    $users = $this->userRepository->getAgeLargerThan(10);
+
+    $locale = $request['lang'];
+
+    if ($locale === 'uk') {
+        $presenter = new DateFormatPresenter_uk();
+    } elseif ($locale === 'tw') {
+        $presenter = new DateFormatPresenter_tw();
+    } else {
+        $presenter = new DateFormatPresenter_us();
+    }
+
+    return view('users.index', compact('users'));
+}
+--
+這種寫法雖然可行，但有幾個問題。
+|1>違反 SOLID 的開放封閉原則 : 若將來有新的語言需求，只能不斷去修改 index()，然後不斷的新增 elseif，就算改用 switch 也是一樣。
+|2>違反 SOLID 的依賴反轉原則 : controller 直接根據語言去 new 相對應的 class，高層直接相依於低層，直接將實作寫死在程式中。
+|3>無法單元測試 : 由於 presenter 直接 new 在 controller，因此要測試時，無法對 presenter 做 mock(依賴反轉原則 : 高層不應該依賴於低層，兩者都應該要依賴抽象；抽象不要依賴細節，細節要依賴抽象)。
+--
+比較好的方式是使用 Factory Pattern。
+////
+//// app/Presenters/DateFormatPresenterFactory.php
+////
+namespace App\Presenters;
+use Illuminate\Support\Facades\App;
+class DateFormatPresenterFactory
+{
+    /**
+     * @param string $locale
+     */
+    public static function bind(string $locale)
+    {
+        App::bind(DateFormatPresenterInterface::class,
+            'MyBlog\Presenters\DateFormatPresenter_' . $locale);
+    }
+}
+使用 Presenter Factory 的 create() 去取代 new 建立物件。這裡當然可以在 create() 去寫 if...elseif 去建立 presenter 物件，不過這樣會違反 SOLID的開放封閉原則，比較好的方式是改用 App::bind()，直接根據 $locale去 binding 相對應的 class，這樣無論再怎麼新增語言與日期格式，controller 與 Presenter Factory 都不用做任何修改，完全符合開放封閉原則。
+--
+4、Controller 控制器
+////
+//// app/Http/Controllers/UserController.php
+////
+namespace App\Http\Controllers;
+use App\Http\Requests;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use MyBlog\Presenters\DateFormatPresenterFactory;
+use MyBlog\Repositories\UserRepository;
+class UserController extends Controller
+{
+    /** @var  UserRepository 注入的UserRepository */
+    protected $userRepository;
+
+    /**
+     * UserController constructor.
+     * @param UserRepository $userRepository
+     */
+    public function __construct(UserRepository $userRepository)
+    {
+        // 將相依的 UserRepository 注入到 UserController
+        $this->userRepository = $userRepository;
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @param Request $request
+     * @param DateFormatPresenterFactory $dateFormatPresenterFactory
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request)
+    {
+        $users = $this->userRepository->getAgeLargerThan(10);
+        $locale = ($request['lang']) ? $request['lang'] : 'us';
+        $dateFormatPresenterFactory::bind($locale);
+
+        return view('users.index', compact('users'));
+    }
+}
+使用 $dateFormatPresenterFactory::bind() 切換 App::bind() 的 presenter 物件，如此 controller 將開放封閉，將來有新的語言需求，也不用修改 controller。
+--
+我們可以發現改用 factory pattern 之後，controller 有了以下的優點。
+|1>符合 SOLID 的開放封閉 原則: 若將來有新的語言需求，controller 完全不用做任何修改。
+|2>符合SOLID 的依賴反轉原則 : controller 不再直接相依於 presenter，而是改由 factory 去建立 presenter。
+|3>可以做單元測試 : 可直接對各 presenter 做單元測試，不需要跑驗收測試就可以測試顯示邏輯。
+--
+--
+5、Blade 模板
+--
+@inject('dateFormatPresenter', 'MyBlog\Presenters\DateFormatPresenterInterface')
+@foreach($users as $user)
+<div>
+	<h2>{{ $user->name }}</h2>
+	<h2>{{ $user->email }}</h2>
+	<h2>{{ $dateFormatPresenter->showDateFormat($user->create_at) }}</h2>
+</div>
+#endforeach
+使用 @inject 注入 presenter，讓 view 也可以如 controller 一樣使用注入的物件。使用 presenter 的 showDateFormat() 將日期轉成想要的格式。
+--
+改用這種寫法，有幾個優點。
+|1>將依需求顯示不同格式的顯示邏輯改寫在 presenter，解決寫在 blade 不容易維護的問題。
+|2>可對顯示邏輯做重構與物件導向。
+|3>符合 SOLID 的開放封閉原則: 將來若有新的語言，對於擴展是開放的，只要新增 class 實踐 DateFormatPresenterInterface 即可；對於修改是封閉的，controller、factory interface、factory 與 view 都不用做任何修改。
+|4>不單只有 PHP 可以使用 service container，連 blade 也可以使用 service container，甚至搭配 service provider。
+|5>可單獨對 presenter 的顯示邏輯做單元測試。
+--
+--
+6、View 视图
+--
+若使用了 presenter 輔助 blade，再搭配 @inject() 注入到 view，view 就會非常乾淨，可專心處理將資料binding到HTML 的職責。將來只有 layout 改變才會動到 blade，若是顯示邏輯改變都是修改 presenter。
+--
+--
+7、Conclusion 小结
+--
+Presenter 使得顯示邏輯從 blade 中解放，不僅更容易維護、更容易擴展、更容易重複使用，且更容易測試。
+--
+--
+8、Sample Code 简单实例
+--
+完整的範例可以在我的 GitHub( https://github.com/oomusou/Laravel51Presenter_demo ) 上找到。
+--
+--
+--
+--
+四、仓库(仓储)模式插件
+参考 https://github.com/andersao/l5-repository
+--
+--
+1、Installation 安装
+## 安装最新仓储
+composer require prettus/l5-repository
+--
+--
+2、仓储配置;
+(1)、要求
+laravel版本 >= laravel5.5
+--
+(2)、添加仓储服务提供器;
+//// config/app.php
+'providers' => [
+    ...
+    Prettus\Repository\Providers\RepositoryServiceProvider::class,
+],
+--
+(3)、发布配置;
+php artisan vendor:publish --provider "Prettus\Repository\Providers\RepositoryServiceProvider"
+--
+--
+3、仓储方法
+--
+(1)、Prettus\Repository\Contracts\RepositoryInterface
+all($columns = array('*'))
+first($columns = array('*'))
+paginate($limit = null, $columns = ['*'])
+find($id, $columns = ['*'])
+findByField($field, $value, $columns = ['*'])
+findWhere(array $where, $columns = ['*'])
+findWhereIn($field, array $where, $columns = [*])
+findWhereNotIn($field, array $where, $columns = [*])
+create(array $attributes)
+update(array $attributes, $id)
+updateOrCreate(array $attributes, array $values = [])
+delete($id)
+deleteWhere(array $where)
+orderBy($column, $direction = 'asc');
+with(array $relations);
+has(string $relation);
+whereHas(string $relation, closure $closure);
+hidden(array $fields);
+visible(array $fields);
+scopeQuery(Closure $scope);
+getFieldsSearchable();
+setPresenter($presenter);
+skipPresenter($status = true);
+--
+(2)、Prettus\Repository\Contracts\RepositoryCriteriaInterface
+pushCriteria($criteria)
+popCriteria($criteria)
+getCriteria()
+getByCriteria(CriteriaInterface $criteria)
+skipCriteria($status = true)
+getFieldsSearchable()
+--
+(3)、Prettus\Repository\Contracts\CacheableInterface
+setCacheRepository(CacheRepository $repository)
+getCacheRepository()
+getCacheKey($method, $args = null)
+getCacheMinutes()
+skipCache($status = true)
+--
+(4)、Prettus\Repository\Contracts\PresenterInterface
+present($data);
+--
+(5)、rettus\Repository\Contracts\Presentable
+setPresenter(PresenterInterface $presenter);
+presenter();
+--
+(6)、Prettus\Repository\Contracts\CriteriaInterface
+apply($model, RepositoryInterface $repository);
+--
+(7)、Prettus\Repository\Contracts\Transformable
+transform();
+--
+--
+4、仓储生成器
+--
+(1)、配置 Config
+//// config/repository.php
+--
+(2)、命令
+--
+//// 注册服务
+//   AppServiceProvider@register
+$this->app->register(RepositoryServiceProvider::class);
+--
+## 创建Post相应实体
+## This will create the Controller, the Validator, the Model, the Repository, the Presenter and the Transformer classes.
+php artisan make:entity Post
+##
+## 创建 Post model
+php artisan make:repository Post
+##
+## 创建 Post repository
+php artisan make:repository "Blog\Post" //指定Blog命名空间;
+php artisan make:repository "Blog\Post" --fillable="title,content" //执行填充属性;
+--
+--
+5、仓储方法调用
+--
+(1)、仓储注入
+namespace App\Http\Controllers;
+use App\PostRepository;
+class PostsController extends BaseController {
+
+    /**
+     * @var PostRepository
+     */
+    protected $repository;
+
+    public function __construct(PostRepository $repository){
+	// 仓储最好注入服务而不是控制器(这里只是举例注入)
+        $this->repository = $repository;
+    }
+
+    ....
+}
+--
+(2)、获取所有数据(无分页)
+$posts = $this->repository->all();
+--
+(3)、获取所有数据(有分页)
+$posts = $this->repository->paginate($limit = null, $columns = ['*']);
+--
+(4)、通过ID获取数据
+$post = $this->repository->find($id);
+--
+(5)、隐藏字段属性
+$post = $this->repository->hidden(['country_id'])->find($id);
+--
+(6)、显示指定字段
+$post = $this->repository->visible(['id', 'state_id'])->find($id);
+--
+(7)、加载模型关联
+$post = $this->repository->with(['state'])->find($id);
+--
+(8)、通过单字段值匹配数据
+$posts = $this->repository->findByField('country_id','15');
+--
+(9)、通过多字段值匹配数据
+$posts = $this->repository->findWhere([
+    //Default Condition =
+    'state_id'=>'10',
+    'country_id'=>'15',
+
+    //Custom Condition
+    ['columnName','>','10']
+]);
+--
+(10)、findWhereIn()方法
+$posts = $this->repository->findWhereIn('id', [1,2,3,4,5]);
+--
+(11)、findWhereNotIn()方法
+$posts = $this->repository->findWhereNotIn('id', [6,7,8,9,10]);
+--
+(12)、scopeQuery()方法
+$posts = $this->repository->scopeQuery(function($query){
+    return $query->orderBy('sort_order','asc');
+})->all();
+--
+(13)、创建 create()方法
+$post = $this->repository->create( Input::all() );
+--
+(14)、更新 update()方法
+$post = $this->repository->update( Input::all(), $id );
+--
+(15)、删除单个 delete()方法
+$this->repository->delete($id)
+--
+(16)、删除多个 deleteWhere()
+$this->repository->deleteWhere([
+    //Default Condition =
+    'state_id'=>'10',
+    'country_id'=>'15',
+])
+--
+--
+6、创建 Criteria
+--
+(1)、创建 Criteria
+php artisan make:criteria My
+--
+(2)、Criteria 类型
+use Prettus\Repository\Contracts\RepositoryInterface;
+use Prettus\Repository\Contracts\CriteriaInterface;
+/**
+ * MyCriteria
+ */
+class MyCriteria implements CriteriaInterface {
+
+    public function apply($model, RepositoryInterface $repository)
+    {
+        $model = $model->where('user_id','=', Auth::user()->id );
+        return $model;
+    }
+}
+--
+(3)、Criteria 使用
+namespace App\Http\Controllers;
+use App\PostRepository;
+class PostsController extends BaseController {
+
+    /**
+     * @var PostRepository
+     */
+    protected $repository;
+
+    public function __construct(PostRepository $repository){
+        $this->repository = $repository;
+    }
+
+
+    public function index()
+    {
+        $this->repository->pushCriteria(new MyCriteria1());
+        $this->repository->pushCriteria(MyCriteria2::class);
+        $posts = $this->repository->all();
+		...
+    }
+
+}
+--
+(4)、通过 Criteria 获取数据
+$posts = $this->repository->getByCriteria(new MyCriteria());
+--
+(5)、设置 Criteria
+use Prettus\Repository\Eloquent\BaseRepository;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    public function boot(){
+        $this->pushCriteria(new MyCriteria());
+        // or
+        $this->pushCriteria(AnotherCriteria::class);
+        ...
+    }
+
+    function model(){
+       return "App\\Post";
+    }
+}
+--
+(5)、跳过 Criteria skipCriteria()方法
+$posts = $this->repository->skipCriteria()->all();
+--
+(6)、移除 Criteria popCriteria()方法
+$this->repository->popCriteria(new Criteria1());
+// or
+$this->repository->popCriteria(Criteria1::class);
+--
+--
+7、RequestCriteria
+note: RequestCriteria is a standard Criteria implementation. It enables filters to perform in the repository from parameters sent in the request.You can perform a dynamic search, filter the data and customize the queries.
+--
+(1)、启用(Enabling in your Repository)
+use Prettus\Repository\Eloquent\BaseRepository;
+use Prettus\Repository\Criteria\RequestCriteria;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+     /**
+     * 允许搜索字段属性
+     * @var array
+     */
+    protected $fieldSearchable = [
+        'name',
+        'email'
+    ];
+
+    public function boot(){
+        $this->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
+        ...
+    }
+
+    function model(){
+       return "App\\Post";
+    }
+}
+--
+(2)、启用
+public function index()
+{
+	$this->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
+	$posts = $this->repository->all();
+	...
+}
+--
+(3)、示例_没有请求过滤规则;
+http://prettus.local/users
+[
+    {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@gmail.com",
+        "created_at": "-0001-11-30 00:00:00",
+        "updated_at": "-0001-11-30 00:00:00"
+    },
+    {
+        "id": 2,
+        "name": "Lorem Ipsum",
+        "email": "lorem@ipsum.com",
+        "created_at": "-0001-11-30 00:00:00",
+        "updated_at": "-0001-11-30 00:00:00"
+    },
+    {
+        "id": 3,
+        "name": "Laravel",
+        "email": "laravel@gmail.com",
+        "created_at": "-0001-11-30 00:00:00",
+        "updated_at": "-0001-11-30 00:00:00"
+    }
+]
+--
+(4)、实列_请求过滤;
+http://prettus.local/users?search=John%20Doe
+or
+http://prettus.local/users?search=John&searchFields=name:like
+or
+http://prettus.local/users?search=john@gmail.com&searchFields=email:=
+or
+http://prettus.local/users?search=name:John Doe;email:john@gmail.com
+or
+http://prettus.local/users?search=name:John;email:john@gmail.com&searchFields=name:like;email:=
+[
+    {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@gmail.com",
+        "created_at": "-0001-11-30 00:00:00",
+        "updated_at": "-0001-11-30 00:00:00"
+    }
+]
+--
+(5)、指定搜索字段连接符searchJoin
+--
+RequestCriteria默认搜索字段的连接符号为 OR，http://prettus.local/users?search=age:17;email:john@gmail.com 等同 “ SELECT * FROM users WHERE age = 17 OR email = 'john@gmail.com'; ”。
+http://prettus.local/users?search=age:17;email:john@gmail.com&searchJoin=and
+--
+(6)、字段过滤
+http://prettus.local/users?filter=id;name
+[
+    {
+        "id": 1,
+        "name": "John Doe"
+    },
+    {
+        "id": 2,
+        "name": "Lorem Ipsum"
+    },
+    {
+        "id": 3,
+        "name": "Laravel"
+    }
+]
+--
+(7)、结果排序
+http://prettus.local/users?filter=id;name&orderBy=id&sortedBy=desc
+[
+    {
+        "id": 3,
+        "name": "Laravel"
+    },
+    {
+        "id": 2,
+        "name": "Lorem Ipsum"
+    },
+    {
+        "id": 1,
+        "name": "John Doe"
+    }
+]
+--
+(8)、通过关联表排序
+http://prettus.local/users?orderBy=posts|title&sortedBy=desc
+表关联SQL类似
+...
+INNER JOIN posts ON users.post_id = posts.id
+...
+ORDER BY title
+...
+--
+http://prettus.local/users?orderBy=posts:custom_id|posts.title&sortedBy=desc
+...
+INNER JOIN posts ON users.custom_id = posts.id
+...
+ORDER BY posts.title
+...
+--
+(9)、分组关联
+http://prettus.local/users?with=groups
+--
+--
+8、缓存 Cache
+--
+(1)、Cache Usage 缓存示例
+NOTES: Implements the interface CacheableInterface and use CacheableRepository Trait.
+use Prettus\Repository\Eloquent\BaseRepository;
+use Prettus\Repository\Contracts\CacheableInterface;
+use Prettus\Repository\Traits\CacheableRepository;
+//// PostRepository
+class PostRepository extends BaseRepository implements CacheableInterface {
+
+    use CacheableRepository;
+
+    ...
+}
+--
+(2)、Cache Config 缓存配置
+//// config/repository.php
+////
+'cache'=>[
+    //Enable or disable cache repositories
+    'enabled'   => true,
+
+    //Lifetime of cache
+    'minutes'   => 30,
+
+    //Repository Cache, implementation Illuminate\Contracts\Cache\Repository
+    'repository'=> 'cache',
+
+    //Sets clearing the cache
+    'clean'     => [
+        //Enable, disable clearing the cache on changes
+        'enabled' => true,
+
+        'on' => [
+            //Enable, disable clearing the cache when you create an item
+            'create'=>true,
+
+            //Enable, disable clearing the cache when upgrading an item
+            'update'=>true,
+
+            //Enable, disable clearing the cache when you delete an item
+            'delete'=>true,
+        ]
+    ],
+    'params' => [
+        //Request parameter that will be used to bypass the cache repository
+        'skipCache'=>'skipCache'
+    ],
+    'allowed'=>[
+        //Allow caching only for some methods
+        'only'  =>null,
+
+        //Allow caching for all available methods, except
+        'except'=>null
+    ],
+],
+--
+//// 仓储类中配置
+//// 
+use Prettus\Repository\Eloquent\BaseRepository;
+use Prettus\Repository\Contracts\CacheableInterface;
+use Prettus\Repository\Traits\CacheableRepository;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository implements CacheableInterface {
+
+    // Setting the lifetime of the cache to a repository specifically
+    protected $cacheMinutes = 90;
+
+    protected $cacheOnly = ['all', ...];
+    //or
+    protected $cacheExcept = ['find', ...];
+
+    use CacheableRepository;
+
+    ...
+}
+The cacheable methods are : all, paginate, find, findByField, findWhere, getByCriteria.
+--
+--
+9、Validators 验证器
+Notes: Requires prettus/laravel-validator. composer require prettus/laravel-validator. For more details click here ( https://github.com/prettus/laravel-validator ).
+--
+(1)、验证器类 定义
+use \Prettus\Validator\LaravelValidator;
+/**
+ * PostValidator
+ * define some rules for both creation and edition.
+ */
+class PostValidator extends LaravelValidator {
+
+    protected $rules = [
+        'title' => 'required',
+        'text'  => 'min:3',
+        'author'=> 'required'
+    ];
+
+}
+--
+use \Prettus\Validator\Contracts\ValidatorInterface;
+use \Prettus\Validator\LaravelValidator;
+/**
+ * PostValidator
+ */
+class PostValidator extends LaravelValidator {
+
+    protected $rules = [
+        ValidatorInterface::RULE_CREATE => [
+            'title' => 'required',
+            'text'  => 'min:3',
+            'author'=> 'required'
+        ],
+        ValidatorInterface::RULE_UPDATE => [
+            'title' => 'required'
+        ]
+   ];
+
+}
+--
+(2)、验证器类 使用
+use Prettus\Repository\Eloquent\BaseRepository;
+use Prettus\Repository\Criteria\RequestCriteria;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    /**
+     * Specify Model class name
+     *
+     * @return mixed
+     */
+    function model(){
+       return "App\\Post";
+    }
+
+    /**
+     * Specify Validator class name
+     *
+     * @return mixed
+     */
+    public function validator()
+    {
+        return "App\\PostValidator";
+    }
+}
+--
+(3)、在仓储中定义验证规则
+use Prettus\Repository\Eloquent\BaseRepository;
+use Prettus\Repository\Criteria\RequestCriteria;
+use Prettus\Validator\Contracts\ValidatorInterface;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    /**
+     * Specify Validator Rules
+     * @var array
+     */
+     protected $rules = [
+        ValidatorInterface::RULE_CREATE => [
+            'title' => 'required',
+            'text'  => 'min:3',
+            'author'=> 'required'
+        ],
+        ValidatorInterface::RULE_UPDATE => [
+            'title' => 'required'
+        ]
+   ];
+
+    /**
+     * Specify Model class name
+     *
+     * @return mixed
+     */
+    function model(){
+       return "App\\Post";
+    }
+
+}
+--
+--
+10、Presenters 推荐者
+--
+(1)、依赖 Fractal  ( http://fractal.thephpleague.com/ )
+## 安装Fractal
+composer require league/fractal
+--
+(2)、转换类
+## 创建转换类
+php artisan make:transformer Post
+##
+use League\Fractal\TransformerAbstract;
+/**
+ * PostTransformer
+ */
+class PostTransformer extends TransformerAbstract
+{
+    public function transform(\Post $post)
+    {
+        return [
+            'id'      => (int) $post->id,
+            'title'   => $post->title,
+            'content' => $post->content
+        ];
+    }
+}
+--
+(3)、Presenter类
+## 创建Presenter类
+php artisan make:presenter Post
+##
+use Prettus\Repository\Presenter\FractalPresenter;
+/**
+ * PostPresenter
+ */
+class PostPresenter extends FractalPresenter {
+
+    /**
+     * Prepare data to present
+     *
+     * @return \League\Fractal\TransformerAbstract
+     */
+    public function getTransformer()
+    {
+        return new PostTransformer();
+    }
+}
+--
+(4)、在仓储启用
+use Prettus\Repository\Eloquent\BaseRepository;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    ...
+
+    public function presenter()
+    {
+        return "App\\Presenter\\PostPresenter";
+    }
+}
+提示：或者在控制器中使用“$this->repository->setPresenter("App\\Presenter\\PostPresenter");”引入。
+--
+(5)、在模型model上实现
+namespace App;
+use Prettus\Repository\Contracts\Presentable;
+use Prettus\Repository\Traits\PresentableTrait;
+/**
+ * Post
+ */
+class Post extends Eloquent implements Presentable {
+
+    use PresentableTrait;
+
+    protected $fillable = [
+        'title',
+        'author',
+        ...
+     ];
+
+     ...
+}
+--
+$repository = app('App\PostRepository');
+$repository->setPresenter("Prettus\\Repository\\Presenter\\ModelFractalPresenter");
+//Getting the result transformed by the presenter directly in the search
+$post = $repository->find(1);
+print_r( $post ); //It produces an output as array
+...
+//Skip presenter and bringing the original result of the Model
+$post = $repository->skipPresenter()->find(1);
+print_r( $post ); //It produces an output as a Model object
+print_r( $post->presenter() ); //It produces an output as array
+--
+////
+// You can skip the presenter at every visit and use it on demand directly into the model, for it set the $skipPresenter attribute to true in your repository.
+////
+use Prettus\Repository\Eloquent\BaseRepository;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    /**
+    * @var bool
+    */
+    protected $skipPresenter = true;
+
+    public function presenter()
+    {
+        return "App\\Presenter\\PostPresenter";
+    }
+}
+--
+(6)、Model模型类
+namespace App;
+use Prettus\Repository\Contracts\Transformable;
+/**
+ * Post
+ */
+class Post extends Eloquent implements Transformable {
+     ...
+     /**
+      * @return array
+      */
+     public function transform()
+     {
+         return [
+             'id'      => (int) $this->id,
+             'title'   => $this->title,
+             'content' => $this->content
+         ];
+     }
+}
+////
+//// 在仓储启用
+////
+// Prettus\Repository\Presenter\ModelFractalPresenter is a Presenter default for Models implementing Transformable.
+use Prettus\Repository\Eloquent\BaseRepository;
+/**
+ * PostRepository
+ */
+class PostRepository extends BaseRepository {
+
+    ...
+
+    public function presenter()
+    {
+        return "Prettus\\Repository\\Presenter\\ModelFractalPresenter";
+    }
+}
+////
+//// 或在控制器引用
+////
+$this->repository->setPresenter("Prettus\\Repository\\Presenter\\ModelFractalPresenter");
+////
+//// Skip Presenter defined in the repository
+////
+// Use skipPresenter before any other chaining method.
+$posts = $this->repository->skipPresenter()->all();
+or
+$this->repository->skipPresenter();
+$posts = $this->repository->all();
+--
+--
+--
+
+
+
+
+
+
+
+
+
+
+https://laravelacademy.org/post/5449.html
+--
+https://www.jianshu.com/p/bc9dac12c049
+--
+
+
+
+
+[PHP_Laravel5.5]_Laravel5.5+passport 放弃 dingo 开发 API 实战；
+--
+参考 https://laravel-china.org/articles/6035/laravel55-developing-api-combat
+--
+--
+1、封装返回信息Trait
+简述：使用 Trait 来封装返回的自定义消息和错误消息，用来做基本的返回。
+////
+//// trait ApiResponse
+////
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ^2_3^王尔贝
+ * Date: 2018/10/8
+ * Time: 16:51
+ * @author ^2_3^王尔贝
+ */
+namespace App\Traits;
+use Symfony\Component\HttpFoundation\Response as FoundationResponse;
+use Response;
+/**
+ * [Trait]_API返回信息;
+ * Trait ApiResponse
+ * @package App\Traits
+ * @author ^2_3^王尔贝
+ */
+trait ApiResponse
+{
+    /**
+     * 状态码(默认200)
+     * @var int
+     * @author ^2_3^王尔贝
+     */
+    protected $statusCode = FoundationResponse::HTTP_OK;
+
+
+    /**
+     * 获取状态码
+     * @return int
+     * @author ^2_3^王尔贝
+     */
+    public function getStatusCode()
+    {
+        return $this->statusCode;
+    }
+
+    /**
+     * 设置状态码
+     * @param $statusCode
+     * @return $this
+     * @author ^2_3^王尔贝
+     */
+    public function setStatusCode( $statusCode )
+    {
+        $this->statusCode = $statusCode;
+        return $this;
+    }
+
+    /**
+     * JSON返回响应
+     * @param $data 返回数据；
+     * @param array $header 响应头部信息；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function respond( $data, $header = [] )
+    {
+        return Response::json($data, $this->getStatusCode(), $header);
+    }
+
+    /**
+     * 状态信息响应
+     * @param $status 状态信息；
+     * @param array $data 响应数据；
+     * @param null $code 状态码；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function status( $status, array $data, $code = null )
+    {
+        //// 状态码设置
+        if ($code){
+            $this->setStatusCode($code);
+        }
+
+        //// 状态信息
+        $a_status = [
+            'status' => $status,
+            'code' => $this->statusCode
+        ];
+
+        $a_data = array_merge($a_status, $data);
+        return $this->respond($a_data);
+    }
+
+    /**
+     * 信息状态响应
+     * @param $message 响应信息；
+     * @param string $status 响应状态说明；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function message($message, $status = "success")
+    {
+        return $this->status($status, [
+            'message' => $message
+        ]);
+    }
+
+    /**
+     * 创建成功响应(201)
+     * @param string $message 创建成功信息；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function created( $message = "created" )
+    {
+        return $this->setStatusCode( FoundationResponse::HTTP_CREATED )->message($message);
+    }
+
+    /**
+     * 成功响应
+     * @param $data 响应数据;
+     * @param string $status 状态说明；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function success( $data, $status = "success" )
+    {
+        return $this->status( $status, compact('data') );
+    }
+
+    /**
+     * 失败响应
+     * @param $message 失败信息；
+     * @param int $code 失败状态码(默认400)；
+     * @param string $status 失败状态说明；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function failed( $message, $code = FoundationResponse::HTTP_BAD_REQUEST, $status = 'error' )
+    {
+        return $this->setStatusCode($code)->message($message, $status);
+    }
+
+    /**
+     * 服务器内部错误(500)
+     * @param string $message 错误信息；
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function internalError( $message = "Internal Error!" )
+    {
+        return $this->failed( $message, FoundationResponse::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * 找不到错误响应(404)
+     * @param string $message
+     * @return mixed
+     * @author ^2_3^王尔贝
+     */
+    public function notFond( $message = 'Not Fond!' )
+    {
+        return $this->failed($message,Foundationresponse::HTTP_NOT_FOUND);
+    }
+
+}
+--
+--
+2、控制器基类 ApiController
+<?php
+/**
+ * Created by PhpStorm.
+ * User: 2_3^王尔贝
+ * Date: 2018/10/8
+ * Time: 17:49
+ * @author ^2_3^王尔贝
+ */
+namespace App\Http\Controllers\Apis;
+use App\Http\Controllers\Controller;
+use App\Traits\ApiResponse;
+/**
+ * 控制器基类
+ * Class ApiController
+ * @package App\Http\Controllers
+ * @author ^2_3^王尔贝
+ */
+class ApiController extends Controller
+{
+    //// ApiResponse 返回Trait
+    use ApiResponse;
+    
+}
+--
+--
+3、
+
+
+
+1、登录
+Route::post('login/user', 'AuthController@users');
+--
+/**
+* 普通用户登录
+*
+* @param  Request  $request
+* @return Response
+*/    
+public function users(Request $request)
+{
+	return $this->oauthToken($request, '用户');
+}
+--
+/**
+* 调用认证接口获取授权码   
+*  
+* @param  Request  $request
+* @param string $client_name 客户端名称
+* @return Response
+*/     
+protected function oauthToken(Request $request, $client_name)
+{
+	$this->validate($request, [
+	    'username' => 'required',
+	    'password' => 'required',
+	]);
+
+	// 请求密码授权令牌
+	$res = $this->oauthPassport($request->username, $request->password, $client_name);
+
+	if ($res) {
+	    $request->request->add($res);
+	    $proxy = Request::create(
+		'oauth/token',
+		'POST'
+	    );
+	    return Route::dispatch($proxy);
+	}
+
+	return $this->failed('登录失败', 401);
+}
+--
+/**
+* 根据授权客户端获取访问令牌    
+* 
+* @param string $username 用户名
+* @param string $password 密码
+* @param string $client_name 客户端名称
+* @param bool $flag 是否返回授权码，默认false
+* @return array
+*/    
+public function oauthPassport($username, $password, $client_name, $flag = false)
+{
+	$res = [];
+
+	// 根据名称获取客户端证书
+	$client = Client::where([
+	    ['password_client', 3],
+	    ['name', $client_name]
+	])->firstOrFail();
+
+	// 获取令牌作用域
+	$scope = Passport::scopes()->first(function ($item, $key) use ($client_name) {
+	    return $item->description === $client_name;
+	});
+
+	if ($scope) {
+	    $res = [
+		'grant_type' => 'password',
+		'client_id' => $client->id,
+		'client_secret' => $client->secret,
+		'scope' => $scope->id,
+		'username' => $username,
+		'password' => $password,
+	    ];
+
+	    // 是否返回 access_token
+	    if ($flag) {
+		$http = new Http;
+		$response = $http->post(env('APP_URL') . 'oauth/token', [
+		    'form_params' => $res,
+		]);
+		return json_decode((string) $response->getBody(), true);
+	    }
+	}
+
+	return $res;
+}
