@@ -1049,6 +1049,7 @@ Presenter 使得顯示邏輯從 blade 中解放，不僅更容易維護、更容
 --
 四、仓库(仓储)模式插件
 参考 https://github.com/andersao/l5-repository
+( https://github.com/cyb43/l5-repository.git )
 --
 --
 1、Installation 安装
@@ -1163,7 +1164,7 @@ class PostsController extends BaseController {
     protected $repository;
 
     public function __construct(PostRepository $repository){
-	// 仓储最好注入服务而不是控制器(这里只是举例注入)
+        // 仓储最好注入服务而不是控制器(这里只是举例注入)
         $this->repository = $repository;
     }
 
@@ -1530,7 +1531,7 @@ The cacheable methods are : all, paginate, find, findByField, findWhere, getByCr
 --
 --
 9、Validators 验证器
-Notes: Requires prettus/laravel-validator. composer require prettus/laravel-validator. For more details click here ( https://github.com/prettus/laravel-validator ).
+Notes: Requires prettus/laravel-validator. composer require prettus/laravel-validator. For more details click here ( https://github.com/prettus/laravel-validator https://github.com/cyb43/laravel-validator ).
 --
 (1)、验证器类 定义
 use \Prettus\Validator\LaravelValidator;
@@ -1801,15 +1802,10 @@ $posts = $this->repository->all();
 
 
 
-
-
-
-
-
-
-
+//// 基于 Laravel 的 API 服务端架构代码
 https://laravelacademy.org/post/5449.html
 --
+//// PHP / Laravel API 开发推荐阅读清单
 https://www.jianshu.com/p/bc9dac12c049
 --
 

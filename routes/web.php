@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| ^2_3^ Web Routes
 |--------------------------------------------------------------------------
 |
 | Here is where you can register web routes for your application. These
@@ -11,6 +11,10 @@
 |
 */
 
+//// 首页路由
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+////
