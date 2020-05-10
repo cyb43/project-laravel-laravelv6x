@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Str;
 
+/**
+ * ^2_3^ 会话配置
+ */
 return [
 
     /*
@@ -80,7 +83,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | When using the "database" session driver, you may specify the table we
-    | should use to manage the sessions. Of course, a sensible default is
+    | should use to manage the sessions. Of course, a sensible(明智的) default is
     | provided for you; however, you are free to change this as needed.
     |
     */
@@ -105,7 +108,7 @@ return [
     | Session Sweeping Lottery
     |--------------------------------------------------------------------------
     |
-    | Some session drivers must manually sweep their storage location to get
+    | Some session drivers must manually(手动) sweep(扫视) their storage location to get
     | rid of old sessions from storage. Here are the chances that it will
     | happen on a given request. By default, the odds are 2 out of 100.
     |
@@ -187,7 +190,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | This option determines how your cookies behave when cross-site requests
-    | take place, and can be used to mitigate CSRF attacks. By default, we
+    | take place, and can be used to mitigate(减轻) CSRF attacks. By default, we
     | do not enable this as other CSRF protection services are in place.
     |
     | Supported: "lax", "strict", "none"

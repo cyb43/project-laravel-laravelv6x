@@ -4,6 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+
+/**
+ * ^2_3^ 队列失败任务表迁移
+ * Class CreateFailedJobsTable
+ */
 class CreateFailedJobsTable extends Migration
 {
     /**

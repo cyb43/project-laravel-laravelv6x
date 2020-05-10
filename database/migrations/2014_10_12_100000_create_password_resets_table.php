@@ -4,6 +4,11 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+
+/**
+ * ^2_3^ 密码重置表迁移
+ * Class CreatePasswordResetsTable
+ */
 class CreatePasswordResetsTable extends Migration
 {
     /**

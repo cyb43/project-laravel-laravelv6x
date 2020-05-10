@@ -22,7 +22,9 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrustProxies::class,
         \App\Http\Middleware\CheckForMaintenanceMode::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        // 清空字段两边空格
         \App\Http\Middleware\TrimStrings::class,
+        // 转换空串为null
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
@@ -33,12 +35,16 @@ class Kernel extends HttpKernel
      */
     protected $middlewareGroups = [
         'web' => [
+            // Cookies加密
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            //
+            // 跨站请求伪造：自动验证请求里的令牌是否与存储在会话中令牌匹配。
             \App\Http\Middleware\VerifyCsrfToken::class,
+            //
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
@@ -63,6 +69,7 @@ class Kernel extends HttpKernel
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
+        // 验证URL签名：防止Url被串改；
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
@@ -70,6 +77,7 @@ class Kernel extends HttpKernel
 
     /**
      * The priority-sorted list of middleware.
+     * 中间件的优先级排序列表。将会强制非全局中间件始终保持给定的顺序。
      *
      * This forces non-global middleware to always be in the given order.
      *

@@ -2,6 +2,9 @@
 
 use Illuminate\Support\Str;
 
+/**
+ * ^2_3^ 数据库配置
+ */
 return [
 
     /*
@@ -19,7 +22,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Database Connections
+    | Database Connections 数据库连接
     |--------------------------------------------------------------------------
     |
     | Here are each of the database connections setup for your application.
@@ -27,7 +30,7 @@ return [
     | supported by Laravel is shown below to make development simple.
     |
     |
-    | All database work in Laravel is done through the PHP PDO facilities
+    | All database work in Laravel is done through the PHP PDO facilities(工具)
     | so make sure you have the driver for your particular database of
     | choice installed on your machine before you begin development.
     |
@@ -119,6 +122,8 @@ return [
 
     'redis' => [
 
+        //// phpredis 比 predis 扩展性能好，但需要安装 PhpRedis PHP 扩展( https://github.com/phpredis/phpredis )。
+        // 安装参考 https://user.qzone.qq.com/1142733640/blog/1589079950
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'options' => [
