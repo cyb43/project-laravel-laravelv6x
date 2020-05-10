@@ -1,0 +1,21 @@
+参考(感谢分享) https://www.jianshu.com/p/e01d44990a73
+1、下载php-redis扩展包
+https://nodeload.github.com/nicolasff/phpredis/zip/master
+2、解压
+tar -zxvf phpredis-master.zip
+3、进入目录
+cd phpredis-master
+4、执行phpize
+// 注意这里是你要安装的php的phpize(如果你安装了php，应该可以直接执行 phpize)
+phpize
+5、编译
+// 如果只有一个php就直接./configure;如果有多个php版本就选需要安装扩展的那个php-config
+// (我安装的是php7.4.5，所以直接执行 ./configure)
+./configure --with-php-config=/usr/local/Cellar/php@7.1/bin/php-config
+6、安装
+make && make install
+7、配置文件增加扩展
+// 打开php的配置文件php.ini，增加代码，可以使用 find . -name php.ini 来查找对应php版本的配置文件
+extension=redis.so
+8、重启服务
+重启fpm就有redis扩展了。(我开发环境用的是valet，重启valet即可)
