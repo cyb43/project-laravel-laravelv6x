@@ -40,6 +40,7 @@ class Kernel extends HttpKernel
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
+            // 表单验证错误信息绑定视图($errors变量)
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             //
             // 跨站请求伪造：自动验证请求里的令牌是否与存储在会话中令牌匹配。
@@ -85,6 +86,7 @@ class Kernel extends HttpKernel
      */
     protected $middlewarePriority = [
         \Illuminate\Session\Middleware\StartSession::class,
+        // 表单验证错误信息绑定视图($errors变量)
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \App\Http\Middleware\Authenticate::class,
         \Illuminate\Routing\Middleware\ThrottleRequests::class,
