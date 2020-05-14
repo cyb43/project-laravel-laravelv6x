@@ -4,6 +4,10 @@ use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
 
+
+/**
+ * ^2_3^ 应用程序日志系统配置
+ */
 return [
 
     /*
@@ -26,7 +30,7 @@ return [
     |
     | Here you may configure the log channels for your application. Out of
     | the box, Laravel uses the Monolog PHP logging library. This gives
-    | you a variety of powerful log handlers / formatters to utilize.
+    | you a variety of(各种各样的) powerful log handlers / formatters to utilize(利用).
     |
     | Available Drivers: "single", "daily", "slack", "syslog",
     |                    "errorlog", "monolog",

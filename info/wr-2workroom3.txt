@@ -1,7 +1,7 @@
 2workroom3工作室
 --
 date 2020-05-01
-version LaravelFramework6.18.10
+version LaravelFramework6.18.14 (php artisan --version)
 project project-laravel-laravelv6x
 --
 --

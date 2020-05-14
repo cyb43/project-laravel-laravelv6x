@@ -1,15 +1,19 @@
 <?php
 
+
+/**
+ * ^2_3^ 身份验证配置文件
+ */
 return [
 
     /*
     |--------------------------------------------------------------------------
-    | Authentication Defaults
+    | Authentication(认证) Defaults
     |--------------------------------------------------------------------------
     |
-    | This option controls the default authentication "guard" and password
+    | This option controls the default authentication "guard(守卫)" and password
     | reset options for your application. You may change these defaults
-    | as required, but they're a perfect start for most applications.
+    | as required, but they're a perfect(完美的) start for most applications.
     |
     */
 
@@ -20,7 +24,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Authentication Guards
+    | Authentication Guards(认证守卫)
     |--------------------------------------------------------------------------
     |
     | Next, you may define every authentication guard for your application.
@@ -28,8 +32,8 @@ return [
     | here which uses session storage and the Eloquent user provider.
     |
     | All authentication drivers have a user provider. This defines how the
-    | users are actually retrieved out of your database or other storage
-    | mechanisms used by this application to persist your user's data.
+    | users are actually retrieved(检索) out of your database or other storage
+    | mechanisms(机制) used by this application to persist your user's data.
     |
     | Supported: "session", "token"
     |
@@ -50,7 +54,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | User Providers
+    | User Providers(用户提供者)
     |--------------------------------------------------------------------------
     |
     | All authentication drivers have a user provider. This defines how the
@@ -58,7 +62,7 @@ return [
     | mechanisms used by this application to persist your user's data.
     |
     | If you have multiple user tables or models you may configure multiple
-    | sources which represent each model / table. These sources may then
+    | sources which represent(代表) each model / table. These sources may then
     | be assigned to any extra authentication guards you have defined.
     |
     | Supported: "database", "eloquent"
@@ -79,15 +83,15 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Resetting Passwords
+    | Resetting Passwords (重置密码)
     |--------------------------------------------------------------------------
     |
-    | You may specify multiple password reset configurations if you have more
+    | You may specify(指定) multiple(多样的) password reset configurations if you have more
     | than one user table or model in the application and you want to have
     | separate password reset settings based on the specific user types.
     |
     | The expire time is the number of minutes that the reset token should be
-    | considered valid. This security feature keeps tokens short-lived so
+    | considered(经过深思熟虑的) valid. This security feature keeps tokens short-lived so
     | they have less time to be guessed. You may change this as needed.
     |
     */
@@ -97,13 +101,13 @@ return [
             'provider' => 'users',
             'table' => 'password_resets',
             'expire' => 60,
-            'throttle' => 60,
+            'throttle' => 60, //节流阀;
         ],
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Password Confirmation Timeout
+    | Password Confirmation(确认) Timeout
     |--------------------------------------------------------------------------
     |
     | Here you may define the amount of seconds before a password confirmation
