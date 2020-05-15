@@ -1,3 +1,4 @@
+{{-- ^2_3^ --}}
 @extends('layouts.app')
 
 @section('content')
@@ -5,7 +6,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">Dashboard</div>
+                <div class="card-header">Dashboard ^2_3^ 2workroom3工作室</div>
 
                 <div class="card-body">
                     @if (session('status'))

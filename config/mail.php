@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * ^2_3^ 邮箱配置
+ */
 return [
 
     /*
@@ -25,7 +28,7 @@ return [
     |
     | Here you may provide the host address of the SMTP server used by your
     | applications. A default option is provided that is compatible with
-    | the Mailgun mail service which will provide reliable deliveries.
+    | the Mailgun mail service which will provide reliable(可靠的) deliveries(交货).
     |
     */
 
@@ -36,7 +39,7 @@ return [
     | SMTP Host Port
     |--------------------------------------------------------------------------
     |
-    | This is the SMTP port used by your application to deliver e-mails to
+    | This is the SMTP port used by your application to deliver(交付) e-mails to
     | users of the application. Like the host we have set this value to
     | stay compatible with the Mailgun e-mail application by default.
     |
@@ -66,7 +69,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify the encryption protocol that should be used when
-    | the application send e-mail messages. A sensible default using the
+    | the application send e-mail messages. A sensible(明智的) default using the
     | transport layer security protocol should provide great security.
     |
     */

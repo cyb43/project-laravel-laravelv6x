@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\VerifiesEmails;
 
+
+/**
+ * ^2_3^ 验证控制器
+ * Class VerificationController
+ * @package App\Http\Controllers\Auth
+ */
 class VerificationController extends Controller
 {
     /*
@@ -18,7 +24,7 @@ class VerificationController extends Controller
     | be re-sent if the user didn't receive the original email message.
     |
     */
-
+    // 验证邮件
     use VerifiesEmails;
 
     /**
@@ -36,7 +42,8 @@ class VerificationController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('signed')->only('verify');
+        $this->middleware('signed')->only('verify'); // 验证URL签名：防止Url被串改；
+        // 节流控制(1分钟6次)
         $this->middleware('throttle:6,1')->only('verify', 'resend');
     }
 }

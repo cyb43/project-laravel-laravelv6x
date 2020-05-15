@@ -63,15 +63,18 @@ class Kernel extends HttpKernel
      * @var array
      */
     protected $routeMiddleware = [
+        // ^2_3^ 认证中间件
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
+        // ^2_3^ 游客身份验证中间件：如已登录，直接跳转home；
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         // 验证URL签名：防止Url被串改；
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
+        // ^2_3^ 节流控制
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];

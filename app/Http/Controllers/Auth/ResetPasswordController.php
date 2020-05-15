@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\ResetsPasswords;
 
+
+/**
+ * ^2_3^ 重置密码控制器
+ * Class ResetPasswordController
+ * @package App\Http\Controllers\Auth
+ */
 class ResetPasswordController extends Controller
 {
     /*
@@ -15,13 +21,14 @@ class ResetPasswordController extends Controller
     |
     | This controller is responsible for handling password reset requests
     | and uses a simple trait to include this behavior. You're free to
-    | explore this trait and override any methods you wish to tweak.
+    | explore this trait and override any methods you wish to tweak(调整).
     |
     */
-
+    // 重置密码trait
     use ResetsPasswords;
 
     /**
+     * 重置成功后跳转路由
      * Where to redirect users after resetting their password.
      *
      * @var string

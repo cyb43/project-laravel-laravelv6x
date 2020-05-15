@@ -9,6 +9,12 @@ use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
+
+/**
+ * ^2_3^ 注册控制器
+ * Class RegisterController
+ * @package App\Http\Controllers\Auth
+ */
 class RegisterController extends Controller
 {
     /*
@@ -21,10 +27,11 @@ class RegisterController extends Controller
     | provide this functionality without requiring any additional code.
     |
     */
-
+    // 注册用户
     use RegistersUsers;
 
     /**
+     * 注册成功后跳转地址
      * Where to redirect users after registration.
      *
      * @var string
@@ -38,10 +45,14 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
+        //// guest中间件
+        // app/Http/Kernel.php:71
+        // 'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         $this->middleware('guest');
     }
 
     /**
+     * ^2_3^注册验证
      * Get a validator for an incoming registration request.
      *
      * @param  array  $data
@@ -57,6 +68,7 @@ class RegisterController extends Controller
     }
 
     /**
+     * ^2_3^创建用户
      * Create a new user instance after a valid registration.
      *
      * @param  array  $data
@@ -67,7 +79,7 @@ class RegisterController extends Controller
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'password' => Hash::make($data['password']), //密码加密;
         ]);
     }
 }

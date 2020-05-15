@@ -6,6 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\ConfirmsPasswords;
 
+
+/**
+ * ^2_3^ 确认密码控制器(在失效后)
+ * Class ConfirmPasswordController
+ * @package App\Http\Controllers\Auth
+ */
 class ConfirmPasswordController extends Controller
 {
     /*
@@ -18,7 +24,7 @@ class ConfirmPasswordController extends Controller
     | this trait and override any functions that require customization.
     |
     */
-
+    // 确认密码
     use ConfirmsPasswords;
 
     /**
