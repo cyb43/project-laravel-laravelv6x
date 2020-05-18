@@ -39,6 +39,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
             \Illuminate\Session\Middleware\StartSession::class,
+            // ^2_3^ 唯一设备中间件，让其它设备上的 Session 失效。
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
             // 表单验证错误信息绑定视图($errors变量)
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
@@ -65,17 +66,21 @@ class Kernel extends HttpKernel
     protected $routeMiddleware = [
         // ^2_3^ 认证中间件
         'auth' => \App\Http\Middleware\Authenticate::class,
+        // ^2_3^ HTTP基础认证，将中间件附加到路由后，在浏览器中访问此路由时将自动提示您输入凭据。
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
         'cache.headers' => \Illuminate\Http\Middleware\SetCacheHeaders::class,
+        // ^2_3^ 用户授权(网关Gate/策略policy)中间件
         'can' => \Illuminate\Auth\Middleware\Authorize::class,
         // ^2_3^ 游客身份验证中间件：如已登录，直接跳转home；
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        // ^2_3^ 密码确认中间件，在访问敏感路由时，需要密码确认；
         'password.confirm' => \Illuminate\Auth\Middleware\RequirePassword::class,
         // 验证URL签名：防止Url被串改；
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         // ^2_3^ 节流控制
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        // ^2_3^ 邮箱是否认证
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
     ];
 

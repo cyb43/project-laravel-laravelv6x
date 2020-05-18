@@ -1,5 +1,10 @@
 <?php
 
+
+/**
+ * ^2_3^ 哈希配置
+ * https://learnku.com/docs/laravel/6.x/hashing/5156
+ */
 return [
 
     /*

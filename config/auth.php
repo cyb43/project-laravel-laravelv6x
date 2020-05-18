@@ -45,11 +45,17 @@ return [
             'provider' => 'users',
         ],
 
+        //// api看守器
+        /// API认证(令牌)
+        /// https://learnku.com/docs/laravel/6.x/api-authentication/5429
+        // 负责检查传入请求上的 API 令牌，并验证它是否匹配数据库中用户分配的令牌。
         'api' => [
             'driver' => 'token',
             'provider' => 'users',
+            // 使用 SHA-256 哈希算法来散列你的 API 令牌，你可以将 api 配置的 hash 选项设置为 true。
             'hash' => false,
         ],
+
     ],
 
     /*

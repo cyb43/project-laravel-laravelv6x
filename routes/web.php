@@ -90,6 +90,9 @@ Route::get('/redis-conn', 'DocController@redisConnection');
 Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 //
+//// Email验证
+Auth::routes(['verify' => true]);
+//
 //// 回退路由
 //Route::fallback(function () {
 //    return '提示：没有其他路由可匹配传入的请求时，才执行的路由。回退路由应始终是你应用程序注册的最后一个路由。';
