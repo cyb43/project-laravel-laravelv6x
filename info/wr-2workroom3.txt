@@ -3,6 +3,7 @@
 date 2020-05-01
 version LaravelFramework6.18.14 (php artisan --version)
 project project-laravel-laravelv6x
+domain project-laravel-laravelv6x.test
 --
 --
 ^2_3^

@@ -25,6 +25,20 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+
+        ////// 访问令牌事件处理
+        ///1/ 添加事件监听属性
+        //// 访问令牌生成事件
+        'Laravel\Passport\Events\AccessTokenCreated' => [
+            'App\Listeners\RevokeOldTokens',
+        ],
+        //// 访问令牌刷新事件
+        'Laravel\Passport\Events\RefreshTokenCreated' => [
+            'App\Listeners\PruneOldRefreshTokens',
+        ],
+        ///2/ 生成监听类
+        //php artisan event:generate
+
     ];
 
     /**

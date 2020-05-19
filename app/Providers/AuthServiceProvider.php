@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Laravel\Passport\Passport;
 
 
 /**
@@ -33,6 +34,17 @@ class AuthServiceProvider extends ServiceProvider
         //// ^2_3^ 注册授权策略
         $this->registerPolicies();
 
-        //
+        // ^2_3^ 注册Passport路由
+        Passport::routes();
+
+        //// ^2_3^ 自定义 Passport 密钥加载路径
+        /// 已使用 config/passport.php 的 private_key/public_key 设置密钥，故而不再设置加载路径。
+        //Passport::loadKeysFrom('/secret-keys/oauth');
+        //Passport::loadKeysFrom('/storage');
+
+        // ^2_3^ 设置令牌有效期
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
     }
 }

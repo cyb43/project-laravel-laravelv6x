@@ -18,6 +18,39 @@ Route::get('/', function () {
     return view('welcome');
 });
 //
+//// [web]OAuth授权码授权令牌
+//1/ 授权码授权请求
+Route::get('/authcode/authorize', 'OAuthCodeController@authCodeAuthorize');
+//2/ 授权码回调(授权码换访问令牌)
+Route::get('/authcode/callback', 'OAuthCodeController@authCodeCallback');
+//3/ 授权码刷新令牌
+Route::get('/authcode/refreshtoken', 'OAuthCodeController@authCodeRefreshToken');
+//4/ 传递访问令牌(访问api路由)
+//$response = $client->request('GET', '/api/user', [
+//    'headers' => [
+//        'Accept' => 'application/json',
+//        'Authorization' => 'Bearer '.$accessToken,
+//    ],
+//]);
+//
+//// ^2_3^ [web路由]OAuth密码授权令牌
+//1/ 获取密码授权令牌
+Route::get('/authpassword/token', 'OAuthPasswordController@passwordToken');
+// from
+// headers Content-Type application/x-www-form-urlencoded
+// body form-data username:1021625889@qq.com password:1357924680
+Route::post('/authpassword/token', 'OAuthPasswordController@passwordToken');
+//2/ 密码授权刷新令牌
+Route::get('/authpassword/refreshtoken', 'OAuthPasswordController@refreshToken');
+Route::post('/authpassword/refreshtoken', 'OAuthPasswordController@refreshToken');
+//3/ 传递访问令牌(访问api路由)
+//$response = $client->request('GET', '/api/user', [
+//    'headers' => [
+//        'Accept' => 'application/json',
+//        'Authorization' => 'Bearer '.$accessToken,
+//    ],
+//]);
+//
 //// Redis连接测试
 Route::get('/redis-conn', 'DocController@redisConnection');
 //

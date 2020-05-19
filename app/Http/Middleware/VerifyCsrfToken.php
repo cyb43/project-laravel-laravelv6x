@@ -26,6 +26,10 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
+        // ^2_3^ 密码授权访问令牌
+        '/authpassword/token',
         //
+        // ^2_3^ 密码授权访问令牌刷新
+        '/authpassword/refreshtoken',
     ];
 }
