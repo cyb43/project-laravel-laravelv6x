@@ -40,7 +40,7 @@ class AuthServiceProvider extends ServiceProvider
         //// ^2_3^ 自定义 Passport 密钥加载路径
         /// 已使用 config/passport.php 的 private_key/public_key 设置密钥，故而不再设置加载路径。
         //Passport::loadKeysFrom('/secret-keys/oauth');
-        //Passport::loadKeysFrom('/storage');
+        Passport::loadKeysFrom(base_path('/storage')); //php artisan passport:keys 产生密钥;
 
         // ^2_3^ 设置令牌有效期
         Passport::tokensExpireIn(now()->addDays(15));
