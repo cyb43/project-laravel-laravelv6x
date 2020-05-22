@@ -19,6 +19,8 @@ class EventServiceProvider extends ServiceProvider
      * ^2_3^ 事件监听
      * The event listener mappings for the application.
      *
+     * 提示：可以使用"php artisan event:generate"命令生成下边没有被创建的事件以及事件监听器；
+     *
      * @var array
      */
     protected $listen = [
@@ -40,6 +42,28 @@ class EventServiceProvider extends ServiceProvider
         //php artisan event:generate
 
     ];
+
+    /**
+     * 确定是否应自动发现事件和侦听器。
+     * @return bool
+     * @author ^2_3^王尔贝
+     */
+    public function shouldDiscoverEvents()
+    {
+        return false;
+    }
+
+    /**
+     * 获取应该用于发现事件的监听器目录
+     * @return array
+     * @author ^2_3^王尔贝
+     */
+    protected function discoverEventsWithin()
+    {
+        return [
+            $this->app->path('Listeners'),
+        ];
+    }
 
     /**
      * Register any events for your application.

@@ -21,7 +21,10 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    //'default' => env('LOG_CHANNEL', 'stack'),
+    //
+    // 默认使用daily
+    'default' => env('LOG_CHANNEL', 'daily'),
 
     /*
     |--------------------------------------------------------------------------

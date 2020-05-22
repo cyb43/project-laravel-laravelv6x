@@ -18,6 +18,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 //
+Route::get('/wr', function () {
+    return '^2_3^ 2workroom3工作室';
+});
+//
 //// [web]OAuth授权码授权令牌
 //1/ 授权码授权请求
 Route::get('/authcode/authorize', 'OAuthCodeController@authCodeAuthorize');
@@ -51,8 +55,18 @@ Route::post('/authpassword/refreshtoken', 'OAuthPasswordController@refreshToken'
 //    ],
 //]);
 //
+//// Doc
+Route::get('/doc', 'DocController@doc');
+//
+//// MySQL连接测试
+Route::get('/mysql-conn', 'DocController@mysqlConnection');
+//
 //// Redis连接测试
 Route::get('/redis-conn', 'DocController@redisConnection');
+//
+//// 分发任务
+Route::get('/job', 'DocController@JobDispatch');
+
 //
 //// ^2_3^认证路由
 /// vendor/laravel/framework/src/Illuminate/Routing/Router.php:1144

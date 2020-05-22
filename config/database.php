@@ -46,6 +46,8 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
+        ///// ^2_3^ mysql
+        ///
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
@@ -119,7 +121,7 @@ return [
     | such as APC or Memcached. Laravel makes it easy to dig right in.
     |
     */
-
+    // ^2_3^ redis
     'redis' => [
 
         //// phpredis 比 predis 扩展性能好，但需要安装 PhpRedis PHP 扩展( https://github.com/phpredis/phpredis )。
