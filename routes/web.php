@@ -59,14 +59,16 @@ Route::post('/authpassword/refreshtoken', 'OAuthPasswordController@refreshToken'
 Route::get('/doc', 'DocController@doc');
 //
 //// MySQL连接测试
-Route::get('/mysql-conn', 'DocController@mysqlConnection');
+Route::get('/doc/mysql-conn', 'DocController@mysqlConnection');
 //
 //// Redis连接测试
-Route::get('/redis-conn', 'DocController@redisConnection');
+Route::get('/doc/redis-conn', 'DocController@redisConnection');
 //
 //// 分发任务
-Route::get('/job', 'DocController@JobDispatch');
-
+Route::get('/doc/job', 'DocController@JobDispatch');
+//
+//// 分发事件(事件监听器队列)
+Route::get('/doc/event', 'DocController@EventDispatch');
 //
 //// ^2_3^认证路由
 /// vendor/laravel/framework/src/Illuminate/Routing/Router.php:1144

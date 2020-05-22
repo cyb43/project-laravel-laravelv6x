@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\DemoEvent;
 use App\Jobs\DemoJob;
 use App\User;
 use Illuminate\Http\Request;
@@ -67,5 +68,21 @@ class DocController extends Controller
         }
 
         return '^2_3^分发任务'.PHP_EOL.'DemoJob::dispatch( $user );'.json_encode( $user->toArray() );
+    }
+
+    /**
+     * 分发事件
+     * @param Request $request
+     * @return string
+     * @author ^2_3^王尔贝
+     */
+    public function EventDispatch(Request $request)
+    {
+        $user = User::find(1);
+
+        // 分发任务
+        event(new DemoEvent($user));
+
+        return 'event(new DemoEvent($user)); (事件监听器队列)';
     }
 }

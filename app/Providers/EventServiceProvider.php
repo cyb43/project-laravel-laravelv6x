@@ -15,6 +15,15 @@ use Illuminate\Support\Facades\Event;
  */
 class EventServiceProvider extends ServiceProvider
 {
+
+    /**
+     * 需要注册的订阅者类。
+     * @var array
+     */
+    protected $subscribe = [
+        'App\Listeners\EventSubscriber',
+    ];
+
     /**
      * ^2_3^ 事件监听
      * The event listener mappings for the application.
@@ -26,6 +35,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+
+        //// 自定义事件/监听器
+        'App\Events\DemoEvent' => [
+            'App\Listeners\DemoEventListener',
         ],
 
         ////// 访问令牌事件处理
