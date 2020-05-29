@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Str;
 
+
+/**
+ * ^2_3^ 缓存系统 配置信息
+ * https://learnku.com/docs/laravel/6.x/cache/5160
+ */
 return [
 
     /*
@@ -11,7 +16,7 @@ return [
     |
     | This option controls the default cache connection that gets used while
     | using this caching library. This connection is used when another is
-    | not explicitly specified when executing a given caching function.
+    | not explicitly(明确地) specified when executing a given caching function.
     |
     | Supported: "apc", "array", "database", "file",
     |            "memcached", "redis", "dynamodb"
@@ -92,9 +97,9 @@ return [
     | Cache Key Prefix
     |--------------------------------------------------------------------------
     |
-    | When utilizing a RAM based store such as APC or Memcached, there might
+    | When utilizing( 利用 ) a RAM based store such as APC or Memcached, there might
     | be other applications utilizing the same cache. So, we'll specify a
-    | value to get prefixed to all our keys so we can avoid collisions.
+    | value to get prefixed to all our keys so we can avoid collisions( 冲突 ).
     |
     */
 
