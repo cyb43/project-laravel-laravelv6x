@@ -13,15 +13,14 @@ use Illuminate\Queue\SerializesModels;
 
 
 /**
- * ^2_3^ 示例事件
- * Class DemoEvent
+ * Presence频道事件
+ * Class BroadcastForPresenceEvent
  * @package App\Events
  * @author ^2_3^王尔贝
  */
-class DemoEvent
+class BroadcastForPresenceEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
 
     /**
      * @var User
@@ -31,8 +30,8 @@ class DemoEvent
 
     /**
      * Create a new event instance.
-     * DemoEvent constructor.
-     * @param User $user
+     *
+     * @return void
      */
     public function __construct(User $user)
     {
@@ -41,11 +40,11 @@ class DemoEvent
 
     /**
      * Get the channels the event should broadcast on.
-     * (广播事件才用指定广播频道)
+     *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-//    public function broadcastOn()
-//    {
-//        return new PrivateChannel('channel-name');
-//    }
+    public function broadcastOn()
+    {
+        return new PresenceChannel('presence-channel-room');
+    }
 }

@@ -22,8 +22,50 @@ Route::get('/wr', function () {
     return '^2_3^ 2workroom3工作室';
 });
 //
+//// 综合话题-广播系统
+//1/ 监听频道
+Route::get('/broadcast/view', 'BroadcastController@broadcast');
+//2/ [公共频道]广播事件
+Route::get('/broadcast/event', function () {
+    $user = \App\User::find(1);
+    broadcast(new \App\Events\BroadcastForEvent($user));
+    broadcast(new \App\Events\BroadcastDemoEvent($user));
+    return 'broadcast_BroadcastForEvent|BroadcastDemoEvent';
+});
+//3/ [私有频道]广播事件
+Route::get('/broadcast/private', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    $str = "没有登录，故而不能广播私有频道事件。";
+    if( !empty( $user ) ) {
+        broadcast( new \App\Events\BroadcastForPrivateEvent( $user ) );
+        $str = "广播私有频道事件(broadcast( new \App\Events\BroadcastForPrivateEvent( {$user} ) );)；";
+    }
+    return $str;
+});
+//4/ [私有频道]广播事件，用户频道
+Route::get('/broadcast/private-user', function () {
+    $users = \App\User::all();
+    $num = $users->count();
+
+    $users->each(function ($user, $key) {
+        broadcast( new \App\Events\BroadcastForPrivateUserEvent( $user ));
+    });
+
+    return "完成{$num}用户私有频道事件广播";
+});
+//5/ [Presence频道]广播事件，聊天空间
+Route::get('/broadcast/presence', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    broadcast( new \App\Events\BroadcastForPresenceEvent($user) );
+
+    return 'broadcast( new \App\Events\BroadcastForPresenceEvent($user) );';
+});
+//
 //// [web]OAuth授权码授权令牌
 //1/ 授权码授权请求
+// http://project-laravel-laravelv6x.test/authcode/authorize
 Route::get('/authcode/authorize', 'OAuthCodeController@authCodeAuthorize');
 //2/ 授权码回调(授权码换访问令牌)
 Route::get('/authcode/callback', 'OAuthCodeController@authCodeCallback');

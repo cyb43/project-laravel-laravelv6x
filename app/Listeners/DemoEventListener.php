@@ -32,7 +32,7 @@ class DemoEventListener implements ShouldQueue
      *
      * @var string|null
      */
-    public $connection = 'database';
+    //public $connection = 'database';
 
     /**
      * 任务发送到的队列的名称.

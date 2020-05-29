@@ -1,0 +1,1095 @@
+2workroom3工作室
+--
+date 2020-05-28
+--
+--
+服务端_PHP_框架_Laravel_Laravel6.x_事件广播系统WebSocketSocket.IO服务器实现laravel-echo-server私有频道认证问题;
+--
+--
+1、私有频道事件
+//
+///0/ 生成事件
+php artisan make:event BroadcastForPrivateEvent
+//
+///1/ BroadcastForPrivateEvent
+// app/Events/BroadcastForPrivateEvent.php
+<?php
+namespace App\Events;
+use App\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+/**
+ * [私有频道]广播事件
+ * Class BroadcastForPrivateEvent
+ * @package App\Events
+ * @author ^2_3^王尔贝
+ */
+class BroadcastForPrivateEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+     * @var User
+     * @author ^2_3^王尔贝
+     */
+    public $user;
+
+    /**
+     * Create a new event instance.
+     *
+     * BroadcastForPrivateEvent constructor.
+     * @param User $user
+     */
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        //// Channel 的实例 代表任何用户可以订阅的公共频道，PrivateChannels 和 PresenceChannels 实列代表需要频道授权
+        /// ( https://learnku.com/docs/laravel/6.x/broadcasting/5159#authorizing-channels )的私有频道。
+
+        /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+        // PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+        return new PrivateChannel("App.User");
+    }
+}
+?>
+--
+--
+2、客户端订阅频道监听事件
+//
+///0/ 客户端 http://project-laravel-laravelv6x.test/
+// resources/views/broadcast.blade.php
+//
+{{-- ^2_3^ project-laravel-laravelv6x.test/broadcast/view --}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        {{-- ///1/ csrf-token --}}
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>Laravel6.x-综合话题-广播系统(广播事件)</title>
+
+        {{-- ///2/ socket.io客户端 + LaravelEcho实例 --}}
+        <script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>
+        <script src="/js/app.js"></script>
+
+        <script>
+            console.log('综合话题-广播事件_客户端');
+            console.log(Echo);
+            console.log('~~~ 监听 ~~~');
+
+            /////1/ 公共频道
+            /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+            //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+            /// private("App.User") 表明要订阅"private-App.User"；
+            /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+            //// (如果没有在laravel-echo-server.json中配置redis前缀，则需要手动指定)使用Redis广播器：Reids前缀"project_laravel_laravelv6x_database_"，订阅频道监听事件。
+            Echo.channel('channel')
+                .listen('BroadcastForEvent', (e) => {
+                    console.log('BroadcastForEvent');
+
+                    console.log(e.user);
+                });
+            //
+            //// 使用postman广播事件：频道没有前缀，事件亦是不用事件命名空间，直接使用"."前缀指定直接使用事件名称。
+            // post http://project-laravel-laravelv6x.test:6001/apps/2e1c375ba1d849ab/events?auth_key=8a7b8de478387febf0b09987585f995b
+            // body-raw
+//            {
+//                "channel": "channel",
+//                "name": "BroadcastForEvent",
+//                "data": {
+//                    "key": "value"
+//                },
+//                "socket_id": "eJ8HHSNATn0MOFcoAAAD"
+//            }
+            Echo.channel('channel')
+                .listen('.BroadcastForEvent', (e) => {
+                console.log('Postman_BroadcastForEvent');
+
+//                $info = e.user == undefined ? '(没有user信息)' : e.user;
+//                console.log($info);
+            });
+            //
+            //
+            /////2/ 私有频道
+            @if ($user)
+                //// 订阅私有频道
+                /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+                //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+                /// private("App.User") 表明要订阅"private-App.User"；
+                /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+                Echo.private("App.User")
+                    .listen('BroadcastForPrivateEvent', (e) => {
+                        console.log('^2_3^ BroadcastForPrivateEvent');
+
+                        console.log(e.user);
+                    });
+                console.log("监听私有频道(App.User)");
+            @endif
+
+        </script>
+
+    </head>
+
+    <body>
+        <h4>Laravel6.x-综合话题-广播系统</h4>
+        <p>https://learnku.com/docs/laravel/6.x/broadcasting/5159</p>
+
+        <p>广播事件</p>
+        <p>广播公共频道事件 <a id="a_broadcast_public" href="javascript:void(0);">BroadcastForEvent</a></p>
+
+        {{-- 已经登录，才能订阅私有频道监听事件 --}}
+        @auth
+            <p>广播私有频道事件 <a id="a_broadcast_private" href="javascript:void(0);">BroadcastForPrivateEvent</a></p>
+            <p id="p_broadcast_private"></p>
+        @else
+            <p>广播私有频道事件 (请先<a href="{{ route('login') }}" target="_blank">登录</a>，才能订阅私有频道)</p>
+        @endauth
+
+    </body>
+
+</html>
+<script type="text/javascript">
+    $(function(){
+        //// 广播共有频道事件
+        $('#a_broadcast_public').click(function (event) {
+            console.log('a_broadcast_public');
+
+            get( "{{ url('/broadcast/event') }}" );
+        });
+
+        //// 广播私有频道事件
+        $('#a_broadcast_private').click(function (event) {
+            console.log('a_broadcast_private');
+
+            get( "{{ url('/broadcast/private') }}" );
+        });
+    });
+
+    //// get请求
+    function get($url) {
+        $.get($url, function (data, status) {
+            console.log(data, status);
+        });
+    }
+</script>
+--
+--
+3、启动laravel-echo-server服务
+$ cd /Users/cenyebao/web/project-laravel-laravelv6x
+$ laravel-echo-server start
+~~~ s ~~~
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+~~~ e ~~~
+--
+--
+4、访问监控客户端
+//
+///0/ 控制器
+// app/Http/Controllers/BroadcastController.php
+<?php
+namespace App\Http\Controllers;
+
+use App\Events\BroadcastDemoEvent;
+use App\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+/**
+ * ^2_3^ 综合话题-广播系统
+ * Class BroadcastController
+ * @package App\Http\Controllers
+ * @author ^2_3^王尔贝
+ */
+class BroadcastController extends Controller
+{
+
+    /**
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //// auth 中间件
+        // app/Http/Kernel.php:66
+        // 'auth' => \App\Http\Middleware\Authenticate::class,
+        $this->middleware('auth');
+    }
+
+    /**
+     * broadcast
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @author ^2_3^王尔贝
+     */
+    public function broadcast(Request $request)
+    {
+        //// 综合话题-广播系统(广播事件)_客户端订阅频道监听事件
+        $user = Auth::user();
+        return view('broadcast', ['user' => $user]);
+    }
+}
+?>
+//
+///1/ 定路由
+// routes/web.php
+//// 综合话题-广播系统
+/// 监听频道
+Route::get('/broadcast/view', 'BroadcastController@broadcast');
+/// [公共频道]广播事件
+Route::get('/broadcast/event', function () {
+    $user = \App\User::find(1);
+    broadcast(new \App\Events\BroadcastForEvent($user));
+    return 'broadcast(new \App\Events\BroadcastForEvent($user));'.json_encode( $user->toArray() );
+});
+/// [私有频道]广播事件
+Route::get('/broadcast/private', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    $str = "没有登录，故而不能广播私有频道事件。";
+    if( !empty( $user ) ) {
+        broadcast( new \App\Events\BroadcastForPrivateEvent( $user ) );
+        $str = "广播私有频道事件(broadcast( new \App\Events\BroadcastForPrivateEvent( {$user} ) );)；";
+    }
+    return $str;
+});
+//
+///2/ 授权频道
+// routes/channels.php
+//// 私有频道，需要用户登录系统通过身份验证，才会进入私有频道授权处理；
+// laravel-echo-server认证错误：broadcasting/auth 403错误，可能就是监听的私有频道名称错误，可能就是redis前缀引起的，可通过laravel-echo-server广播事件时输出信息确定；
+// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+Broadcast::channel('App.User', function ($user) {
+    Log::info('私有频道(App.User)授权'.json_encode( $user->toArray() ));
+    return true;
+});
+//
+///3/ 访客户端，订阅频道
+// 访问
+http://project-laravel-laravelv6x.test/broadcast/view
+// laravel-echo-server 频道订阅 输出信息
+~~~ s ~~~
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+// 公共频道订阅(无需用户登录)
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: channel
+// LaravelEcho自动验证私有频道(其实就是频道授权routes/channels.php文件中定义授权即可，如果routes/channels.php没有定义，会报403错误)
+[11:48:20 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[11:48:20 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+// 私有频道订阅
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB authenticated for: private-App.User
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: private-App.User
+~~~ e ~~~
+--
+--
+5、laravel-echo-server 私有频道认证(broadcasting/auth) 403错误
+在定义私有频道事件(如app/Events/BroadcastForPrivateEvent.php)时，在broadcastOn()方法中，PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(如project_laravel_laravelv6x_database_)。PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+在客户端(如resources/views/broadcast.blade.php)中，private("App.User") 表明要订阅"private-App.User"。显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+--
+--
+6、监听事件队列
+处理发布事件到redis队列以供laravel-echo-server订阅，以广播到websocket客户端。
+php artisan queue:listen
+--
+--
+7、广播事件到公共频道
+//
+///0/ 事件 app/Events/BroadcastForEvent.php
+<?php
+namespace App\Events;
+
+use App\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+/**
+ * 事件广播
+ * Class broadcastForEvent
+ *
+ * php artisan make:event BroadcastForEvent
+ *
+ * @package App\Events
+ * @author ^2_3^王尔贝
+ */
+class BroadcastForEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+     * @var User
+     * @author ^2_3^王尔贝
+     */
+    public $user;
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct( User $user )
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        //// Channel 的实例 代表任何用户可以订阅的公共频道，PrivateChannels 和 PresenceChannels 实列代表需要频道授权( https://learnku.com/docs/laravel/6.x/broadcasting/5159#authorizing-channels )的私有频道。
+        return new Channel('channel');
+    }
+}
+?>
+//
+///1/ 广播事件
+Route::get('/broadcast/event', function () {
+    $user = \App\User::find(1);
+    broadcast(new \App\Events\BroadcastForEvent($user));
+    return 'broadcast(new \App\Events\BroadcastForEvent($user));'.json_encode( $user->toArray() );
+});
+//
+///2/ laravel-echo-server 事件广播 输出信息
+~~~ s ~~~
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: channel
+[11:48:20 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[11:48:20 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB authenticated for: private-App.User
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: private-App.User
+// 公共频道事件广播
+Channel: project_laravel_laravelv6x_database_channel
+Event: App\Events\BroadcastForEvent
+--
+--
+8、广播事件到私有频道
+///1/ 定义事件
+// app/Events/BroadcastForPrivateEvent.php
+<?php
+namespace App\Events;
+use App\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+/**
+ * [私有频道]广播事件
+ * Class BroadcastForPrivateEvent
+ * @package App\Events
+ * @author ^2_3^王尔贝
+ */
+class BroadcastForPrivateEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+     * @var User
+     * @author ^2_3^王尔贝
+     */
+    public $user;
+
+    /**
+     * Create a new event instance.
+     *
+     * BroadcastForPrivateEvent constructor.
+     * @param User $user
+     */
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        //// Channel 的实例 代表任何用户可以订阅的公共频道，PrivateChannels 和 PresenceChannels 实列代表需要频道授权
+        /// ( https://learnku.com/docs/laravel/6.x/broadcasting/5159#authorizing-channels )的私有频道。
+
+        /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+        // PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+        return new PrivateChannel("App.User");
+    }
+}
+?>
+//
+///2/ 广播事件
+Route::get('/broadcast/private', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    $str = "没有登录，故而不能广播私有频道事件。";
+    if( !empty( $user ) ) {
+        broadcast( new \App\Events\BroadcastForPrivateEvent( $user ) );
+        $str = "广播私有频道事件(broadcast( new \App\Events\BroadcastForPrivateEvent( {$user} ) );)；";
+    }
+    return $str;
+});
+//
+///3/ 广播信息
+~~~ s ~~~
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: channel
+[11:48:20 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[11:48:20 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB authenticated for: private-App.User
+[11:48:20 PM] - uguxzl5sJrv1c6WwAAAB joined channel: private-App.User
+Channel: project_laravel_laravelv6x_database_channel
+Event: App\Events\BroadcastForEvent
+Channel: project_laravel_laravelv6x_database_private-App.User
+Event: App\Events\BroadcastForPrivateEvent
+~~~ e ~~~
+--
+--
+9、laravel-echo-server配置文件
+//// laravel-echo-server.json
+{
+	"authHost": "http://project-laravel-laravelv6x.test",
+	"authEndpoint": "/broadcasting/auth",
+	"clients": [
+		{
+			"appId": "2e1c375ba1d849ab",
+			"key": "8a7b8de478387febf0b09987585f995b"
+		}
+	],
+	"database": "redis",
+	"databaseConfig": {
+		"redis": {
+			"port": 16479,
+			"host": "127.0.0.1",
+			"password": "",
+			"keyPrefix": "project_laravel_laravelv6x_database_"
+		},
+		"sqlite": {
+			"databasePath": "/database/laravel-echo-server.sqlite"
+		}
+	},
+	"devMode": true,
+	"host": null,
+	"port": "6001",
+	"protocol": "http",
+	"socketio": {},
+	"secureOptions": 67108864,
+	"sslCertPath": "",
+	"sslKeyPath": "",
+	"sslCertChainPath": "",
+	"sslPassphrase": "",
+	"subscribers": {
+		"http": true,
+		"redis": true
+	},
+	"apiOriginAllow": {
+		"allowCors": true,
+		"allowOrigin": "http://project-laravel-laravelv6x.test:80",
+		"allowMethods": "GET, POST",
+		"allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
+	}
+}
+--
+--
+10、私有频道(针对用户)事件广播
+(1)、事件定义
+//// app/Events/BroadcastForPrivateUserEvent.php
+<?php
+namespace App\Events;
+use App\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+/**
+ * 私有频道，针对用户
+ * Class BroadcastForPrivateUserEvent
+ * @package App\Events
+ * @author ^2_3^王尔贝
+ */
+class BroadcastForPrivateUserEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $user;
+
+    /**
+     * Create a new event instance.
+     *
+     * BroadcastForPrivateUserEvent constructor.
+     * @param User $user
+     */
+    public function __construct( User $user )
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        $id = $this->user->id;
+        return new PrivateChannel("App.User.{$id}");
+    }
+}
+?>
+(2)、频道授权
+//// routes/channels.php
+//// 私有频道，针对用户频道；
+Broadcast::channel('App.User.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+(3)、定义广播事件路由
+// routes/web.php
+//// [私有频道]广播事件，用户频道
+Route::get('/broadcast/private-user', function () {
+    $users = \App\User::all();
+    $num = $users->count();
+
+    $users->each(function ($user, $key) {
+        broadcast( new \App\Events\BroadcastForPrivateUserEvent( $user ));
+    });
+
+    return "完成{$num}用户私有频道事件广播";
+});
+(4)、订阅频道监听事件
+//// resources/views/broadcast.blade.php
+{{-- ^2_3^ project-laravel-laravelv6x.test/broadcast/view --}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        {{-- ///1/ csrf-token --}}
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>Laravel6.x-综合话题-广播系统(广播事件)</title>
+
+        {{-- ///2/ socket.io客户端 + LaravelEcho实例 --}}
+        <script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>
+        <script src="/js/app.js"></script>
+
+        <script>
+            //console.log(Echo);
+
+            /////1/ 公共频道
+            /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+            //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+            /// private("App.User") 表明要订阅"private-App.User"。
+            /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+            //// (如果没有在laravel-echo-server.json中配置redis前缀，则需要手动指定)使用Redis广播器：Reids前缀"project_laravel_laravelv6x_database_"，订阅频道监听事件。
+            Echo.channel('channel')
+                .listen('BroadcastForEvent', (e) => {
+                    console.log('channel => BroadcastForEvent');
+
+                    console.log(e.user);
+                })
+                .listen('BroadcastDemoEvent', (e) => {
+                    console.log('channel => BroadcastDemoEvent');
+
+                    console.log(e.user);
+                });
+            //
+            //// 使用postman广播事件：频道没有前缀，事件亦是不用事件命名空间，直接使用"."前缀指定直接使用事件名称。
+            // post http://project-laravel-laravelv6x.test:6001/apps/2e1c375ba1d849ab/events?auth_key=8a7b8de478387febf0b09987585f995b
+            // body-raw
+//            {
+//                "channel": "channel",
+//                "name": "BroadcastForEvent",
+//                "data": {
+//                    "key": "value"
+//                },
+//                "socket_id": "eJ8HHSNATn0MOFcoAAAD"
+//            }
+            Echo.channel('channel')
+                .listen('.BroadcastForEvent', (e) => {
+                console.log('Postman_BroadcastForEvent');
+
+//                $info = e.user == undefined ? '(没有user信息)' : e.user;
+//                console.log($info);
+            });
+            //
+            //
+            /////2/ 私有频道
+            @if ($user)
+                //// 订阅私有频道
+                /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+                //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+                /// private("App.User") 表明要订阅"private-App.User"；
+                /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+                Echo.private("App.User")
+                    .listen('BroadcastForPrivateEvent', (e) => {
+                        console.log('^2_3^ BroadcastForPrivateEvent');
+
+                        console.log(e.user);
+                    });
+                //
+                //// 订阅私有频道，针对登录用户
+                Echo.private("App.User."+{{ $user['id']  }})
+                    .listen('BroadcastForPrivateUserEvent', (e) => {
+                        console.log('^2_3^ BroadcastForPrivateUserEvent');
+
+                        console.log(e.user);
+                    });
+
+
+            @endif
+
+        </script>
+
+    </head>
+
+    <body>
+        <h4>Laravel6.x-综合话题-广播系统</h4>
+        <p>https://learnku.com/docs/laravel/6.x/broadcasting/5159</p>
+
+        <p>广播事件</p>
+        <p>广播公共频道事件 <a id="a_broadcast_public" href="javascript:void(0);">BroadcastForEvent</a></p>
+
+        {{-- 已经登录，才能订阅私有频道监听事件 --}}
+        @auth
+            <p>广播私有频道事件 <a id="a_broadcast_private" href="javascript:void(0);">BroadcastForPrivateEvent</a></p>
+
+            <p>广播私有频道事件(针对用户) <a id="a_broadcast_private_user" href="javascript:void(0);">BroadcastForPrivateUserEvent</a></p>
+        @else
+            <p>广播私有频道事件 (请先<a href="{{ route('login') }}" target="_blank">登录</a>，才能订阅私有频道)</p>
+        @endauth
+
+    </body>
+
+</html>
+<script type="text/javascript">
+    $(function(){
+        //// 广播共有频道事件
+        $('#a_broadcast_public').click(function (event) {
+            console.log('a_broadcast_public');
+
+            get( "{{ url('/broadcast/event') }}" );
+        });
+
+        //// 广播私有频道事件
+        $('#a_broadcast_private').click(function (event) {
+            console.log('a_broadcast_private');
+
+            get( "{{ url('/broadcast/private') }}" );
+        });
+
+        //// 广播私有频道事件(针对用户)
+        $('#a_broadcast_private_user').click(function (event) {
+            console.log('a_broadcast_private_user');
+
+            get( "{{ url('/broadcast/private-user') }}" );
+        });
+    });
+
+    //// get请求
+    function get($url) {
+        $.get($url, function (data, status) {
+            console.log(data, status);
+        });
+    }
+</script>
+(5)、不同浏览器登录不同用户访问客户端
+http://project-laravel-laravelv6x.test/broadcast/view
+//
+//// laravel-echo-server 广播事件输出信息
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+//// 用户1 订阅频道
+[4:14:51 AM] - 9EIR5D_5rwwGIm-dAAAA joined channel: channel
+[4:14:51 AM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[4:14:51 AM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[4:14:51 AM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[4:14:51 AM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[4:14:52 AM] - 9EIR5D_5rwwGIm-dAAAA authenticated for: private-App.User.1
+[4:14:52 AM] - 9EIR5D_5rwwGIm-dAAAA joined channel: private-App.User.1
+[4:14:52 AM] - 9EIR5D_5rwwGIm-dAAAA authenticated for: private-App.User
+[4:14:52 AM] - 9EIR5D_5rwwGIm-dAAAA joined channel: private-App.User
+//// 用户2 订阅频道
+[4:15:24 AM] - a-fm868UeVT8DBPqAAAB joined channel: channel
+[4:15:24 AM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[4:15:24 AM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[4:15:24 AM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[4:15:24 AM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[4:15:24 AM] - a-fm868UeVT8DBPqAAAB authenticated for: private-App.User.2
+[4:15:24 AM] - a-fm868UeVT8DBPqAAAB joined channel: private-App.User.2
+[4:15:25 AM] - a-fm868UeVT8DBPqAAAB authenticated for: private-App.User
+[4:15:25 AM] - a-fm868UeVT8DBPqAAAB joined channel: private-App.User
+//// 广播事件
+Channel: project_laravel_laravelv6x_database_private-App.User.1
+Event: App\Events\BroadcastForPrivateUserEvent
+Channel: project_laravel_laravelv6x_database_private-App.User.2
+Event: App\Events\BroadcastForPrivateUserEvent
+--
+--
+11、Presence 频道
+Presence 频道建立在私有频道安全性的基础上，同时暴露谁订阅频道的附加特征。这样可以轻松构建功能强大的协作应用程序功能，例如在其他用户查看同一页面时通知用户。
+(1)、频道授权
+//// routes/channels.php
+//// Presence 频道
+// 如果用户有权加入该频道，则不会返回 true，返回有关用户的数据数组。
+// 如果用户未被授权加入 Presence 频道，则应返回 false 或 null。
+Broadcast::channel('presence-channel-room', function ($user) {
+    return ['id' => $user->id, 'name' => $user->name];
+});
+(2)、事件定义
+// php artisan make:BroadcastForPresenceEvent
+//// app/Events/BroadcastForPresenceEvent.php
+<?php
+namespace App\Events;
+use App\User;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+/**
+ * Presence频道事件
+ * Class BroadcastForPresenceEvent
+ * @package App\Events
+ * @author ^2_3^王尔贝
+ */
+class BroadcastForPresenceEvent implements ShouldBroadcast
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    /**
+     * @var User
+     * @author ^2_3^王尔贝
+     */
+    public $user;
+
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        return new PresenceChannel('presence-channel-room');
+    }
+}
+?>
+(3)、广播事件路由
+//// routes/web.php
+// [Presence频道]广播事件，聊天空间
+Route::get('/broadcast/presence', function () {
+    $user = \Illuminate\Support\Facades\Auth::user();
+
+    broadcast( new \App\Events\BroadcastForPresenceEvent($user) );
+
+    return 'broadcast( new \App\Events\BroadcastForPresenceEvent($user) );';
+});
+(4)、客户端订阅频道监听事件
+//// resources/views/broadcast.blade.php
+{{-- ^2_3^ project-laravel-laravelv6x.test/broadcast/view --}}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+
+        {{-- ///1/ csrf-token --}}
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>Laravel6.x-综合话题-广播系统(广播事件)</title>
+
+        {{-- ///2/ socket.io客户端 + LaravelEcho实例 --}}
+        <script src="//{{ Request::getHost() }}:6001/socket.io/socket.io.js"></script>
+        <script src="/js/app.js"></script>
+
+        <script>
+            //console.log(Echo);
+
+            /////1/ 公共频道
+            /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+            //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+            /// private("App.User") 表明要订阅"private-App.User"。
+            /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+            //// (如果没有在laravel-echo-server.json中配置redis前缀，则需要手动指定)使用Redis广播器：Reids前缀"project_laravel_laravelv6x_database_"，订阅频道监听事件。
+            Echo.channel('channel')
+                .listen('BroadcastForEvent', (e) => {
+                    console.log('channel => BroadcastForEvent');
+
+                    console.log(e.user);
+                })
+                .listen('BroadcastDemoEvent', (e) => {
+                    console.log('channel => BroadcastDemoEvent');
+
+                    console.log(e.user);
+                });
+            //
+            //// 使用postman广播事件：频道没有前缀，事件亦是不用事件命名空间，直接使用"."前缀指定直接使用事件名称。
+            // post http://project-laravel-laravelv6x.test:6001/apps/2e1c375ba1d849ab/events?auth_key=8a7b8de478387febf0b09987585f995b
+            // body-raw
+//            {
+//                "channel": "channel",
+//                "name": "BroadcastForEvent",
+//                "data": {
+//                    "key": "value"
+//                },
+//                "socket_id": "eJ8HHSNATn0MOFcoAAAD"
+//            }
+            Echo.channel('channel')
+                .listen('.BroadcastForEvent', (e) => {
+                console.log('Postman_BroadcastForEvent');
+
+//                $info = e.user == undefined ? '(没有user信息)' : e.user;
+//                console.log($info);
+            });
+            //
+            //
+            /////2/ 私有频道
+            @if ($user)
+                //// 订阅私有频道
+                /// PrivateChannel("App.User") 会发布"private-App.User"到redis，最终发布频道会加上redis前缀(project_laravel_laravelv6x_database_)。
+                //  PrivateChannel("App.User") 发布事件到频道 project_laravel_laravelv6x_database_private-App.User。
+                /// private("App.User") 表明要订阅"private-App.User"；
+                /// 显然客户端订阅的频道名称 和 事件发布到redis的频道名称 因为redis存在前缀而订阅不到，可通过在laravel-echo-server.json中配置'"keyPrefix": "project_laravel_laravelv6x_database_"'，跟框架一样的前缀就不用手动指定。
+                Echo.private("App.User")
+                    .listen('BroadcastForPrivateEvent', (e) => {
+                        console.log('^2_3^ BroadcastForPrivateEvent');
+
+                        console.log(e.user);
+                    });
+                //
+                //// 订阅私有频道，针对登录用户
+                Echo.private("App.User."+{{ $user['id']  }})
+                    .listen('BroadcastForPrivateUserEvent', (e) => {
+                        console.log('^2_3^ BroadcastForPrivateUserEvent');
+
+                        console.log(e.user);
+                    });
+                //
+                //// 加入 Presence 频道
+                Echo.join('presence-channel-room')
+                    .here((users) => {
+                        // 将接收包含当前订阅该频道的所有其他用户的用户信息的数组。
+                        console.log('Presence频道，目前有'+users.length+'用户在线；');
+                    })
+                    .joining((user) => {
+                        console.log('Presence频道，有新成员'+user.name+'加入；');
+                    })
+                    .leaving((user) => {
+                        console.log('Presence频道，'+user.name+'离开；');
+                    })
+                    .listen('BroadcastForPresenceEvent', (e) => {
+                        console.log('监听BroadcastForPresenceEvent事件；');
+
+                        var user = e.user;
+                        var userid = user['id'];
+                        var username = user['name'];
+                        var ta_broadcast_presence_user_str = $('#ta_broadcast_presence_user').text();
+                        ta_broadcast_presence_user_str += "\n用户"+username+"["+userid+"]抖动了一下！";
+
+                        $('#ta_broadcast_presence_user').html(ta_broadcast_presence_user_str);
+                    });
+            @endif
+
+        </script>
+
+    </head>
+
+    <body>
+        <h4>Laravel6.x-综合话题-广播系统</h4>
+        <p>https://learnku.com/docs/laravel/6.x/broadcasting/5159</p>
+
+        <p>广播事件</p>
+        <p>广播公共频道事件 <a id="a_broadcast_public" href="javascript:void(0);">BroadcastForEvent</a></p>
+
+        {{-- 已经登录，才能订阅私有频道监听事件 --}}
+        @auth
+            <p>广播私有频道事件 <a id="a_broadcast_private" href="javascript:void(0);">BroadcastForPrivateEvent</a></p>
+
+            <p>广播私有频道事件(针对用户) <a id="a_broadcast_private_user" href="javascript:void(0);">BroadcastForPrivateUserEvent</a></p>
+
+            <p>广播Presence频道事件 <a id="a_broadcast_presence_user" href="javascript:void(0);">BroadcastForPresenceEvent</a></p>
+            <div>
+                <textarea id="ta_broadcast_presence_user" style="width: 100%; height: 230px;">(Presence频道聊天空间互动)</textarea>
+            </div>
+        @else
+            <p>广播私有频道事件 (请先<a href="{{ route('login') }}" target="_blank">登录</a>，才能订阅私有频道)</p>
+        @endauth
+
+    </body>
+
+</html>
+<script type="text/javascript">
+    $(function(){
+        //// 广播共有频道事件
+        $('#a_broadcast_public').click(function (event) {
+            console.log('a_broadcast_public');
+
+            get( "{{ url('/broadcast/event') }}" );
+        });
+
+        //// 广播私有频道事件
+        $('#a_broadcast_private').click(function (event) {
+            console.log('a_broadcast_private');
+
+            get( "{{ url('/broadcast/private') }}" );
+        });
+
+        //// 广播私有频道事件(针对用户)
+        $('#a_broadcast_private_user').click(function (event) {
+            console.log('a_broadcast_private_user');
+
+            get( "{{ url('/broadcast/private-user') }}" );
+        });
+        
+        //// 广播presence频道事件
+        $('#a_broadcast_presence_user').click(function (event) {
+            console.log('a_broadcast_presence_user');
+
+            get( "{{ url('/broadcast/presence') }}" );
+        });
+    });
+
+    //// get请求
+    function get($url) {
+        $.get($url, function (data, status) {
+            console.log(data, status);
+        });
+    }
+</script>
+(5)、redis监听队列
+$ php artisan queue:listen
+(6)、开启laravel-echo-server
+$ laravel-echo-server start
+~~~ s ~~~
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+~~~ e ~~~
+(7)、不同用户不同浏览器访问客户端
+http://project-laravel-laravelv6x.test/broadcast/view
+(8)、广播presence频道事件
+//// 事件队列 输出
+project-laravel-laravelv6x git:(master) ✗ php artisan queue:listen
+[2020-05-29 10:13:43][OaYvPicKMaVKrLXqTMZI8tTi5eCZPmVl] Processing: App\Events\BroadcastForPresenceEvent
+[2020-05-29 10:13:43][OaYvPicKMaVKrLXqTMZI8tTi5eCZPmVl] Processed:  App\Events\BroadcastForPresenceEvent
+//
+//// laravel-echo-server 输出
+~~~ s ~~~
+L A R A V E L  E C H O  S E R V E R
+version 1.6.2
+⚠ Starting server in DEV mode...
+✔  Running at localhost on port 6001
+✔  Channels are ready.
+✔  Listening for http events...
+✔  Listening for redis events...
+Server ready!
+//// 订阅频道
+// 用户1
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA joined channel: channel
+[6:13:15 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:15 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:15 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:15 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:15 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:15 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA authenticated for: presence-presence-channel-room
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA joined channel: presence-presence-channel-room
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA authenticated for: private-App.User.1
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA joined channel: private-App.User.1
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA authenticated for: private-App.User
+[6:13:15 PM] - wRPx0TR4JXdEtIajAAAA joined channel: private-App.User
+// 用户2
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB joined channel: channel
+[6:13:30 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:30 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:30 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:30 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:30 PM] - Preparing authentication request to: http://project-laravel-laravelv6x.test
+[6:13:30 PM] - Sending auth request to: http://project-laravel-laravelv6x.test/broadcasting/auth
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB authenticated for: private-App.User.2
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB joined channel: private-App.User.2
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB authenticated for: presence-presence-channel-room
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB joined channel: presence-presence-channel-room
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB authenticated for: private-App.User
+[6:13:30 PM] - tsNS1xwlTf9nSW-WAAAB joined channel: private-App.User
+// 事件广播
+Channel: project_laravel_laravelv6x_database_presence-presence-channel-room
+Event: App\Events\BroadcastForPresenceEvent
+--
+--
+--

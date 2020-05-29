@@ -127,6 +127,7 @@ return [
         //// phpredis 比 predis 扩展性能好，但需要安装 PhpRedis PHP 扩展( https://github.com/phpredis/phpredis )。
         // 安装参考 https://user.qzone.qq.com/1142733640/blog/1589079950
         'client' => env('REDIS_CLIENT', 'phpredis'),
+        //'client' => env('REDIS_CLIENT', 'predis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),

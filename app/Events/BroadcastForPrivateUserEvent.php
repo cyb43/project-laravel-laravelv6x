@@ -13,39 +13,36 @@ use Illuminate\Queue\SerializesModels;
 
 
 /**
- * ^2_3^ 示例事件
- * Class DemoEvent
+ * 私有频道，针对用户
+ * Class BroadcastForPrivateUserEvent
  * @package App\Events
  * @author ^2_3^王尔贝
  */
-class DemoEvent
+class BroadcastForPrivateUserEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-
-    /**
-     * @var User
-     * @author ^2_3^王尔贝
-     */
     public $user;
 
     /**
      * Create a new event instance.
-     * DemoEvent constructor.
+     *
+     * BroadcastForPrivateUserEvent constructor.
      * @param User $user
      */
-    public function __construct(User $user)
+    public function __construct( User $user )
     {
         $this->user = $user;
     }
 
     /**
      * Get the channels the event should broadcast on.
-     * (广播事件才用指定广播频道)
+     *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-//    public function broadcastOn()
-//    {
-//        return new PrivateChannel('channel-name');
-//    }
+    public function broadcastOn()
+    {
+        $id = $this->user->id;
+        return new PrivateChannel("App.User.{$id}");
+    }
 }

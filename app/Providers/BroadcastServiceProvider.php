@@ -5,6 +5,11 @@ namespace App\Providers;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * ^2_3^ 综合话题-广播系统
+ * Class BroadcastServiceProvider
+ * @package App\Providers
+ */
 class BroadcastServiceProvider extends ServiceProvider
 {
     /**

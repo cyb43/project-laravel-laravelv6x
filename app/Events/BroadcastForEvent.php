@@ -10,18 +10,21 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 
 /**
- * ^2_3^ 示例事件
- * Class DemoEvent
+ * 事件广播
+ * Class broadcastForEvent
+ *
+ * php artisan make:event BroadcastForEvent
+ *
  * @package App\Events
  * @author ^2_3^王尔贝
  */
-class DemoEvent
+class BroadcastForEvent implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
-
 
     /**
      * @var User
@@ -31,21 +34,22 @@ class DemoEvent
 
     /**
      * Create a new event instance.
-     * DemoEvent constructor.
-     * @param User $user
+     *
+     * @return void
      */
-    public function __construct(User $user)
+    public function __construct( User $user )
     {
         $this->user = $user;
     }
 
     /**
      * Get the channels the event should broadcast on.
-     * (广播事件才用指定广播频道)
+     *
      * @return \Illuminate\Broadcasting\Channel|array
      */
-//    public function broadcastOn()
-//    {
-//        return new PrivateChannel('channel-name');
-//    }
+    public function broadcastOn()
+    {
+        //// Channel 的实例 代表任何用户可以订阅的公共频道，PrivateChannels 和 PresenceChannels 实列代表需要频道授权( https://learnku.com/docs/laravel/6.x/broadcasting/5159#authorizing-channels )的私有频道。
+        return new Channel('channel');
+    }
 }
