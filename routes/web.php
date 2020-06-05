@@ -22,6 +22,25 @@ Route::get('/wr', function () {
     return '^2_3^ 2workroom3工作室';
 });
 //
+//// 综合话题-消息通知
+Route::get('/notification', function() {
+    $user = \App\User::find(1);
+    \Illuminate\Support\Facades\Notification::send($user, new \App\Notifications\DemoNotification($user));
+
+    return '消息通知：为用户(id->1)发送消息通知(邮件/数据库)';
+});
+//
+//// 综合话题-邮件发送
+Route::get('/email-send', function () {
+    try {
+        $user = \App\User::find(1);
+        Mail::to($user)->send(new \App\Mail\DemoMail($user));
+        return '邮件发送成功！^2_3^';
+    }catch (Exception $e) {
+        return $e;
+    }
+});
+//
 //// 综合话题-广播系统
 //1/ 监听频道
 Route::get('/broadcast/view', 'BroadcastController@broadcast');

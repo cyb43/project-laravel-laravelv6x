@@ -16,6 +16,7 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
     // HasApiTokens #Passport OAuth 认证;
+    // Notifiable 通知trait;
     use HasApiTokens, Notifiable;
 
     /**

@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
     ];
 
     /**
+     * 任务调度
      * Define the application's command schedule.
      *
      * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
@@ -29,6 +30,12 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        // $schedule->call() 创建闭包来调度任务；
+        // $schedule->command() 方法传递命令名称或者类来调度一个 Artisan 命令;
+        // $schedule->job() 调度队列任务；
+        // $schedule->exec() 方法可用于向操作系统发送命令；
+
+        //// 名言命令
         // $schedule->command('inspire')
         //          ->hourly();
     }
