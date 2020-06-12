@@ -32,6 +32,84 @@ CREATE TABLE `cache` (
 
 
 -- ----------------------------
+--  ^2_3^ demo_post文章
+--  Table structure for `posts`
+-- ----------------------------
+DROP TABLE IF EXISTS `demo_posts`;
+CREATE TABLE `demo_posts` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT "文章ID",
+  `title` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "标题",
+  `created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "创建时间戳",
+  `updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "更新时间戳",
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ----------------------------
+--  ^2_3^ demo_post_content文章内容
+--  Table structure for `posts`
+-- ----------------------------
+DROP TABLE IF EXISTS `demo_posts_contents`;
+CREATE TABLE `demo_posts_contents` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT "内容ID",
+  `post_id` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "文章ID",
+  `content` text COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "内容",
+  `created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "创建时间戳",
+  `updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "更新时间戳",
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ----------------------------
+--  ^2_3^ demo_post_comments文章评论
+--  Table structure for `demo_post_comments`
+-- ----------------------------
+DROP TABLE IF EXISTS `demo_post_comments`;
+CREATE TABLE `demo_post_comments` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT "评论ID",
+  `post_id` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "文章ID",
+  `comment_txt` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "评论",
+  `created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "创建时间戳",
+  `updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "更新时间戳",
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ----------------------------
+--  ^2_3^ demo_post_tags文章标签
+--  Table structure for `demo_post_tags`
+-- ----------------------------
+DROP TABLE IF EXISTS `demo_post_tags`;
+CREATE TABLE `demo_post_tags` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT "标签ID",
+  `tag_name` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "评论",
+  `created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "创建时间戳",
+  `updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "更新时间戳",
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ----------------------------
+--  ^2_3^ demo_post_tags_pivots文章标签中间表
+--  Table structure for `demo_post_tags_pivots`
+-- ----------------------------
+DROP TABLE IF EXISTS `demo_post_tags_pivots`;
+CREATE TABLE `demo_post_tags_pivots` (
+  `id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT "ID",
+  `post_id` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "文章ID",
+  `tag_id` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "标签ID",
+  `created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "创建时间戳",
+  `updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT "更新时间戳",
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ----------------------------
 --  ^2_3^ 任务失败表
 --  Table structure for `failed_jobs`
 -- ----------------------------

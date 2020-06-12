@@ -6,6 +6,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 
 /**
@@ -16,10 +17,24 @@ use Laravel\Passport\HasApiTokens;
 class User extends Authenticatable
 {
     // HasApiTokens #Passport OAuth 认证;
-    // Notifiable 通知trait;
-    use HasApiTokens, Notifiable;
+    // Notifiable #通知trait;
+    use HasApiTokens
+        , Notifiable
+        //, SoftDeletes
+        ;
 
     /**
+     * 模型事件映射
+     *
+     * @var array
+     */
+//    protected $dispatchesEvents = [
+//        'saved' => UserSaved::class,
+//        'deleted' => UserDeleted::class,
+//    ];
+
+    /**
+     * 可批量赋值字段
      * The attributes that are mass assignable.
      *
      * @var array

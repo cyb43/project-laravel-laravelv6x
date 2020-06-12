@@ -22,6 +22,93 @@ Route::get('/wr', function () {
     return '^2_3^ 2workroom3工作室';
 });
 //
+//// EloquentORM-模型关联
+Route::get('/post', function () {
+//    for ($i=1; $i<=10; $i++)
+//    {
+//        $post = new \App\Models\DemoPost();
+//        $post->title = "文章标题({$i})";
+//        $post->save();
+//    }
+
+    $posts = \App\Models\DemoPost::get();
+    foreach ( $posts as $post )
+    {
+        //// 时间
+        //dump( $post->created_at->format('Y-m-d H:i:s') );
+        //dump( $post->toArray()['created_at'] );
+
+        ////// 数据填充
+        //// 文章内容
+//        $content = new \App\Models\DemoPostsContent();
+//        $content->post_id = $post->id;
+//        $content->content = "内容({$post->id})";
+//        $content->save();
+        //
+        //// 文章评论
+//        $comment = new \App\Models\DemoPostComment();
+//        $comment->fill(['post_id' => $post->id, 'comment_txt' => "文章({$post->id})评论1"]);
+//        $comment->save();
+        //
+        //// 文章标签
+//        $tag = new \App\Models\DemoPostTag();
+//        $tag->tag_name = "标签({$post->id})";
+//        $tag->save();
+        //
+        //// 文章标签关联
+//        DB::table("demo_post_tags_pivot")->insert(
+//            [
+//                ['post_id' => $post->id, 'tag_id' => 1, 'created_at' => time(), 'updated_at' => time()],
+//                ['post_id' => $post->id, 'tag_id' => 2, 'created_at' => time(), 'updated_at' => time()]
+//            ]
+//        );
+//        \App\Models\DemoPostTagsPivot::create(
+//            ['post_id' => $post->id, 'tag_id' => 3]
+//        );
+
+        ////// 模型关联
+        $data = [];
+        $data["title"] = $post->title;
+        //
+        //// 一对一
+        $content = $post->demoPostsContent;
+        $data["content"] = $content->content;
+        //
+        //// 一对多
+        $comments = $post->demoPostComments;
+        $data['comments'] = [];
+        foreach ($comments as $comment) {
+            //// 一对多_反向关联
+            $comment_post = $comment->demoPost;
+            $tmpArray['post_title'] = $comment_post->title;
+
+            $tmpArray['post_comment'] = $comment->comment_txt;
+            $data['comments'][] = $tmpArray;
+        }
+        //
+        //// 多对多
+        $tags = $post->demoPostTags; //文章标签;
+        foreach ($tags as $tag) {
+            $tagTmp = [];
+            $tagTmp['tag_name'] = $tag->tag_name;
+
+            //// 多对多_反向关联
+            $tagPosts = $tag->demoPosts; //标签文章;
+            $tpTmp = [];
+            foreach ($tagPosts as $tagPost) {
+                $tpTmp[] = $tagPost->title;
+            }
+            $tagTmp['tag_post'] = $tpTmp;
+
+            $data['tags'][] = $tagTmp;
+        }
+
+        dump( $data );
+    }
+
+    return 'post操作';
+});
+//
 //// 综合话题-消息通知
 Route::get('/notification', function() {
     $user = \App\User::find(1);
