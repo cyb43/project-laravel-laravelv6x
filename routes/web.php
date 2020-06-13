@@ -22,6 +22,16 @@ Route::get('/wr', function () {
     return '^2_3^ 2workroom3工作室';
 });
 //
+//// EloquentORM-API资源
+Route::get('/user', function () {
+    // api资源
+    return new \App\Http\Resources\User( \App\User::find(1) );
+});
+Route::get('/users', function () {
+    // api资源集合
+    return new \App\Http\Resources\Users( \App\User::all() );
+});
+//
 //// EloquentORM-模型关联
 Route::get('/post', function () {
 //    for ($i=1; $i<=10; $i++)
