@@ -8,11 +8,11 @@ use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
-| Model Factories
+| Model Factories (^2_3^ 模型工厂)
 |--------------------------------------------------------------------------
 |
 | This directory should contain each of the model factory definitions for
-| your application. Factories provide a convenient way to generate new
+| your application. Factories provide a convenient(适当的) way to generate new
 | model instances for testing / seeding your application's database.
 |
 */

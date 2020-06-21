@@ -4,6 +4,12 @@ namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 
+
+/**
+ * ^2_3^
+ * Trait CreatesApplication
+ * @package Tests
+ */
 trait CreatesApplication
 {
     /**

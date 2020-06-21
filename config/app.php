@@ -179,6 +179,7 @@ return [
         // ^2_3^ 综合话题-广播系统
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
     ],

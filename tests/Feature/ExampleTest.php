@@ -5,6 +5,12 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+
+/**
+ * ^2_3^ 功能测试
+ * Class ExampleTest
+ * @package Tests\Feature
+ */
 class ExampleTest extends TestCase
 {
     /**

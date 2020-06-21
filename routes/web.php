@@ -15,6 +15,9 @@
 //
 //// 首页路由
 Route::get('/', function () {
+
+    //return phpinfo();
+
     return view('welcome');
 });
 //
@@ -139,6 +142,10 @@ Route::get('/email-send', function () {
 });
 //
 //// 综合话题-广播系统
+/// 启动laravel-echo-server服务
+// $ laravel-echo-server start
+/// 启动队列监听
+// $ php artisan queue:listen
 //1/ 监听频道
 Route::get('/broadcast/view', 'BroadcastController@broadcast');
 //2/ [公共频道]广播事件

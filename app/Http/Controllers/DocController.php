@@ -63,7 +63,7 @@ class DocController extends Controller
     public function JobDispatch(Request $request)
     {
         $user = User::find(1);
-        for ($i = 0; $i < 2; $i++) {
+        for ($i = 0; $i < 20; $i++) {
             DemoJob::dispatch( $user );
         }
 
