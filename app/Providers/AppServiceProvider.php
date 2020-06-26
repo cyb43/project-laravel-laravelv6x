@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -19,7 +20,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        //// telescope应用调试工具_仅本地开发
+        if( $this->app->isLocal() ) {
+            $this->app->register(TelescopeServiceProvider::class);
+        }
+
     }
 
     /**
@@ -30,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        //// ^2_3^ 启用 Redis 事件，必须启用 Redis 事件才能使 Telescope应用调试工具的 Redis 监听器正常运行。
+        // Redis 监听器记录您的应用程序执行的所有 Redis 命令。如果您使用 Redis 进行缓存，Redis 监听器也会记录缓存命令。
+        Redis::enableEvents();
     }
 }

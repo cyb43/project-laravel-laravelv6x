@@ -16,14 +16,22 @@
 //// 首页路由
 Route::get('/', function () {
 
+//    for ($n = 100; $n--;) {
+//        dump("{$n}".PHP_EOL);
+//    }
+
     //return phpinfo();
 
-    return view('welcome');
+     return view('welcome');
 });
 //
 Route::get('/wr', function () {
     return '^2_3^ 2workroom3工作室';
 });
+//
+//// github第三方授权登录回调
+Route::get('login/github', 'Auth\SocialiteController@gitHubRedirectToProvider');
+Route::get('login/github/callback', 'Auth\SocialiteController@gitHubHandleProviderCallback');
 //
 //// EloquentORM-API资源
 Route::get('/user', function () {

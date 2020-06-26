@@ -181,6 +181,8 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\HorizonServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        // ^2_3^ telescope应用调试工具
+        //App\Providers\TelescopeServiceProvider::class,
 
     ],
 
