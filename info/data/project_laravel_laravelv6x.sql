@@ -285,6 +285,52 @@ CREATE TABLE `sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------
+--  ^2_3^ Telescope调试工具_实体表
+--  Table structure for `telescope_entries`
+-- ----------------------------
+DROP TABLE IF EXISTS `telescope_entries`;
+CREATE TABLE `telescope_entries` (
+  `sequence` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT "序号",
+  `uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "uuid字串",
+  `batch_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "batch_id字串",
+  `family_hash` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT "family_hash字串",
+  `should_display_on_index` tinyint(1) NOT NULL DEFAULT '1' COMMENT "should_display_on_index值",
+  `type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "类型",
+  `content` longtext COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "content内容",
+  `created_at` datetime DEFAULT NULL COMMENT "创建时间",
+  PRIMARY KEY (`sequence`),
+
+  UNIQUE KEY `telescope_entries_uuid_unique` (`uuid`),
+  KEY `telescope_entries_batch_id_index` (`batch_id`),
+  KEY `telescope_entries_family_hash_index` (`family_hash`),
+  KEY `telescope_entries_created_at_index` (`created_at`),
+  KEY `telescope_entries_type_should_display_on_index_index` (`type`,`should_display_on_index`)
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+--  ^2_3^ Telescope调试工具_实体标签表
+--  Table structure for `telescope_entries_tags`
+-- ----------------------------
+DROP TABLE IF EXISTS `telescope_entries_tags`;
+CREATE TABLE `telescope_entries_tags` (
+  `entry_uuid` char(36) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "entry_uuid值",
+  `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT "标签",
+
+  KEY `telescope_entries_tags_entry_uuid_tag_index` (`entry_uuid`,`tag`),
+  KEY `telescope_entries_tags_tag_index` (`tag`),
+  CONSTRAINT `telescope_entries_tags_entry_uuid_foreign` FOREIGN KEY (`entry_uuid`) REFERENCES `telescope_entries` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
+--  ^2_3^ Telescope调试工具_实体监控表
+--  Table structure for `telescope_monitoring`
+-- ----------------------------
+DROP TABLE IF EXISTS `telescope_monitoring`;
+CREATE TABLE `telescope_monitoring` (
+  `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ----------------------------
 --  ^2_3^ 用户表
 --  Table structure for `users`
 -- ----------------------------
