@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="522a2833-4e5c-4ca5-9036-52d9fccb14c5" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/info/data/project_laravel_laravelv6x_sd_20200706.sql" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/info/data/project_laravel_laravelv6x_20200518.sql" afterPath="$PROJECT_DIR$/info/data/project_laravel_laravelv6x_sd_20200518.sql" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/info/data/project_laravel_laravelv6x.sql" afterPath="$PROJECT_DIR$/info/data/project_laravel_laravelv6x.sql" />
-    </list>
+    <list default="true" id="522a2833-4e5c-4ca5-9036-52d9fccb14c5" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -323,12 +318,12 @@
       <workItem from="1593160751333" duration="1732000" />
       <workItem from="1593242530688" duration="1478000" />
       <workItem from="1593552651512" duration="53000" />
-      <workItem from="1593965678440" duration="4462000" />
+      <workItem from="1593965678440" duration="4568000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="421577000" />
+    <option name="totallyTimeSpent" value="421683000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
