@@ -7,6 +7,9 @@ domain project-laravel-laravelv6x.test
 --
 --
 ^2_3^
+TODO lavavelAdmin;
+TODO 数据存储架构(中大型专案架构);
+^2_3^
 --
 --
 --
