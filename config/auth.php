@@ -41,8 +41,8 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
+            'driver' => 'session', //使用会话存储和Cookies来维护状态;
+            'provider' => 'users', //提供者，如何检索用户;
         ],
 
         //// api看守器
@@ -61,7 +61,7 @@ return [
         /// https://learnku.com/docs/laravel/6.x/passport/5152
         'api' => [
             'driver' => 'passport',
-            'provider' => 'users',
+            'provider' => 'users', //提供者，如何检索用户;
         ],
 
     ],
@@ -90,7 +90,7 @@ return [
         ],
 
         // 'users' => [
-        //     'driver' => 'database',
+        //     'driver' => 'database', //数据库查询生成器;
         //     'table' => 'users',
         // ],
     ],
